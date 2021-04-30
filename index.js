@@ -214,7 +214,7 @@ instance.prototype.update_variables = function (system) {
 
 	feedbacks['streaming_state'] = {
 		label: 'Device is streaming',
-		description: 'Change colors of bank if the device is streaming',
+		description: 'Change background colour if the device is streaming',
 		options: [
 			{
 				type: 'colorpicker',
