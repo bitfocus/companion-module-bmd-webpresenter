@@ -23,13 +23,13 @@ function instance(system) {
 
 instance.prototype.deviceInformation = function(key,data) {
 	var self = this;
-	var changed = false;
 	var oldHasData = self.has_data = true;
 	
 	self.log('debug','device information process key: ' + key)
 
 	if (key == 'STREAM STATE') {
-		debug('Stream state: ', data);
+		
+		self.log('debug','data = ' + data);
 
 		if (data['Status'] !== undefined) {
 			self.streaming = data['Status'];
@@ -121,14 +121,14 @@ instance.prototype.init_tcp = function() {
 				self.log('debug',line.toString())
 			}
 
-			receivebuffer = receivebuffer.substr(offset);
+			receivebuffer = receivebuffer.substr(offset)
 		});
 
 		self.socket.on('receiveline', function (line) {
 
 			if (self.command === null && line.match(/:/) ) {
 				self.command = line;
-				self.log('debug','command:' + line)
+				self.log('debug','command: ' + line)
 			}
 			else if (self.command !== null && line.length > 0) {
 				self.stash.push(line.trim());
@@ -136,7 +136,7 @@ instance.prototype.init_tcp = function() {
 			else if (line.length === 0 && self.command !== null) {
 				var cmd = self.command.trim().split(/:/)[0];
 
-				self.log('debug','COMMAND:', cmd);
+				self.log('debug','COMMAND: ' + cmd);
 
 				var obj = {};
 				self.stash.forEach(function (val) {
