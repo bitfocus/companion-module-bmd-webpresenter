@@ -40,7 +40,7 @@ instance.prototype.deviceInformation = function(key,data) {
 		}
 	}
 	
-	
+	/*
 	if (key == 'VIDEO ADVANCED') {
 		debug('Video Advanced: ', data);
 		
@@ -52,7 +52,7 @@ instance.prototype.deviceInformation = function(key,data) {
 			self.log('debug',self.streaming)
 		}
 	}
-	
+	*/
 	
 	// Initial data from device
 	if (oldHasData != self.has_data && self.has_data) {
