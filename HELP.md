@@ -5,3 +5,4 @@ This first release of the module allows you to start/stop the stream and to rece
 
 ## Version 1.0.1
 Added Reboot and Factory Reset actions.
+Added Stream Settings.

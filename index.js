@@ -39,21 +39,7 @@ instance.prototype.deviceInformation = function(key,data) {
 			self.log('debug',self.streaming)
 		}
 	}
-	
-	/*
-	if (key == 'VIDEO ADVANCED') {
-		debug('Video Advanced: ', data);
-		
-		if (data['Scenecut detect'] !== undefined) {
-			self.streaming = data['Scenecut detect'];
-			self.setVariable('stream_state', self.streaming);
-			self.checkFeedbacks('streaming_state');
-			self.has_data = true;
-			self.log('debug',self.streaming)
-		}
-	}
-	*/
-	
+
 	// Initial data from device
 	if (oldHasData != self.has_data && self.has_data) {
 		self.checkFeedbacks();
@@ -334,6 +320,41 @@ instance.prototype.actions = function() {
 				}
 			]
 		},
+		'stream_settings': {
+			label: 'Stream Settings',
+			options: [
+				{
+					type: 'textinput',
+					label: 'Video Mode',
+					id: 'video_mode',
+					default: 'Auto',
+				},
+				{
+					type: 'textinput',
+					label: 'Platform',
+					id: 'platform',
+					default: 'YouTube',
+				},
+				{
+					type: 'textinput',
+					label: 'Server',
+					id: 'server',
+					default: 'Primary',
+				},
+				{
+					type: 'textinput',
+					label: 'Quality',
+					id: 'quality',
+					default: 'Streaming Medium',
+				},
+				{
+					type: 'textinput',
+					label: 'Stream Key',
+					id: 'key',
+					default: '',
+				},
+			]
+		},
 		'device': {
 			label: 'Device Control',
 			options: [
@@ -360,6 +381,12 @@ instance.prototype.action = function(action) {
 	if (action.action === 'stream') {
 		cmd = 'STREAM STATE:\nAction: ' + action.options.stream_control + '\n\n'
 		self.log('debug',cmd)
+	}
+	
+	if (action.action === 'stream_settings') {
+		cmd = 'STREAM SETTINGS:\nVideo Mode: ' + action.options.video_mode + '\n' + 'Current Platform: ' + action.options.platform + '\n' + 'Current Server: ' + action.options.server + '\n' + 'Current Quality Level: ' + action.options.quality + '\n' + 'Stream Key: ' + action.options.key + '\n\n'
+		self.log('debug',cmd)
+		console.log(cmd)
 	}
 	
 	if (action.action === 'device') {
