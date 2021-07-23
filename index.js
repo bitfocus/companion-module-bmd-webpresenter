@@ -29,7 +29,7 @@ instance.prototype.deviceInformation = function(key,data) {
 
 	if (key == 'STREAM STATE') {
 		
-		self.log('debug','data = ' + data);
+		// self.log('debug','data = ' + data);
 
 		if (data['Status'] !== undefined) {
 			self.streaming = data['Status'];
@@ -334,6 +334,21 @@ instance.prototype.actions = function() {
 				}
 			]
 		},
+		'device': {
+			label: 'Device Control',
+			options: [
+				{
+					type: 'dropdown',
+					label: 'State',
+					id: 'device_control',
+					default: 'Reboot',
+					choices: [
+						{ id: 'Reboot', label: 'Reboot' },
+						{ id: 'Factory Reset', label: 'Factory Reset' },
+					]
+				}
+			]
+		},
 	});
 }
 
@@ -344,6 +359,11 @@ instance.prototype.action = function(action) {
 
 	if (action.action === 'stream') {
 		cmd = 'STREAM STATE:\nAction: ' + action.options.stream_control + '\n\n'
+		self.log('debug',cmd)
+	}
+	
+	if (action.action === 'device') {
+		cmd = 'SHUTDOWN:\nAction: ' + action.options.device_control + '\n\n'
 		self.log('debug',cmd)
 	}
 
