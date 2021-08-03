@@ -1,150 +1,146 @@
 // BlackMagic Design Web Presenter HD
 
-var tcp = require('../../tcp');
-var instance_skel = require('../../instance_skel');
-var debug;
-var log;
+var tcp = require('../../tcp')
+var instance_skel = require('../../instance_skel')
+var debug
+var log
 
 function instance(system) {
-	var self = this;
+	var self = this
 
 	// Request id counter
-	self.request_id = 0;
-	self.stash = [];
-	self.command = null;
+	self.request_id = 0
+	self.stash = []
+	self.command = null
 
 	// super-constructor
-	instance_skel.apply(this, arguments);
+	instance_skel.apply(this, arguments)
 
-	self.actions(); // export actions
+	self.actions() // export actions
 
-	return self;
+	return self
 }
 
-instance.prototype.deviceInformation = function(key,data) {
-	var self = this;
-	var oldHasData = self.has_data = true;
-	
-	self.log('debug','device information process key: ' + key)
+instance.prototype.deviceInformation = function (key, data) {
+	var self = this
+	var oldHasData = (self.has_data = true)
+
+	self.log('debug', 'device information process key: ' + key)
 
 	if (key == 'STREAM STATE') {
-		
 		// self.log('debug','data = ' + data);
 
 		if (data['Status'] !== undefined) {
-			self.streaming = data['Status'];
-			self.setVariable('stream_state', self.streaming);
-			self.checkFeedbacks('streaming_state');
-			self.has_data = true;
-			self.log('debug',self.streaming)
+			self.streaming = data['Status']
+			self.setVariable('stream_state', self.streaming)
+			self.checkFeedbacks('streaming_state')
+			self.has_data = true
+			self.log('debug', self.streaming)
 		}
 	}
 
 	// Initial data from device
 	if (oldHasData != self.has_data && self.has_data) {
-		self.checkFeedbacks();
-		self.update_variables();
+		self.checkFeedbacks()
+		self.update_variables()
 	}
+}
 
-};
+instance.prototype.updateConfig = function (config) {
+	var self = this
 
-instance.prototype.updateConfig = function(config) {
-	var self = this;
+	self.config = config
+	self.init_tcp()
+}
 
-	self.config = config;
-	self.init_tcp();
-};
+instance.prototype.init = function () {
+	var self = this
 
-instance.prototype.init = function() {
-	var self = this;
+	debug = self.debug
+	log = self.log
 
-	debug = self.debug;
-	log = self.log;
+	self.init_tcp()
 
-	self.init_tcp();
+	self.update_variables() // export variables
+	self.init_presets()
+}
 
-	self.update_variables(); // export variables
-	self.init_presets();
-};
-
-instance.prototype.init_tcp = function() {
-	var self = this;
-	var receivebuffer = '';
+instance.prototype.init_tcp = function () {
+	var self = this
+	var receivebuffer = ''
 
 	if (self.socket !== undefined) {
-		self.socket.destroy();
-		delete self.socket;
+		self.socket.destroy()
+		delete self.socket
 	}
 
-	self.has_data = false;
+	self.has_data = false
 
 	if (self.config.host) {
-		self.socket = new tcp(self.config.host, self.config.port);
+		self.socket = new tcp(self.config.host, self.config.port)
 
 		self.socket.on('status_change', function (status, message) {
-			self.status(status, message);
-		});
+			self.status(status, message)
+		})
 
 		self.socket.on('error', function (err) {
-			debug('Network error', err);
-			self.log('error','Network error: ' + err.message);
-		});
+			debug('Network error', err)
+			self.log('error', 'Network error: ' + err.message)
+		})
 
 		self.socket.on('connect', function () {
-			debug('Connected');
-		});
+			debug('Connected')
+		})
 
 		// separate buffered stream into lines with responses
 		self.socket.on('data', function (chunk) {
-			self.log('debug','data received')
-			var i = 0, line = '', offset = 0;
-			receivebuffer += chunk;
+			self.log('debug', 'data received')
+			var i = 0,
+				line = '',
+				offset = 0
+			receivebuffer += chunk
 
-			while ( (i = receivebuffer.indexOf('\n', offset)) !== -1) {
-				line = receivebuffer.substr(offset, i - offset);
-				offset = i + 1;
-				self.socket.emit('receiveline', line.toString());
-				self.log('debug',line.toString())
+			while ((i = receivebuffer.indexOf('\n', offset)) !== -1) {
+				line = receivebuffer.substr(offset, i - offset)
+				offset = i + 1
+				self.socket.emit('receiveline', line.toString())
+				self.log('debug', line.toString())
 			}
 
 			receivebuffer = receivebuffer.substr(offset)
-		});
+		})
 
 		self.socket.on('receiveline', function (line) {
+			if (self.command === null && line.match(/:/)) {
+				self.command = line
+				self.log('debug', 'command: ' + line)
+			} else if (self.command !== null && line.length > 0) {
+				self.stash.push(line.trim())
+			} else if (line.length === 0 && self.command !== null) {
+				var cmd = self.command.trim().split(/:/)[0]
 
-			if (self.command === null && line.match(/:/) ) {
-				self.command = line;
-				self.log('debug','command: ' + line)
-			}
-			else if (self.command !== null && line.length > 0) {
-				self.stash.push(line.trim());
-			}
-			else if (line.length === 0 && self.command !== null) {
-				var cmd = self.command.trim().split(/:/)[0];
+				self.log('debug', 'COMMAND: ' + cmd)
 
-				self.log('debug','COMMAND: ' + cmd);
-
-				var obj = {};
+				var obj = {}
 				self.stash.forEach(function (val) {
-					var info = val.split(/\s*:\s*/);
-					obj[info.shift()] = info.join(':');
-				});
+					var info = val.split(/\s*:\s*/)
+					obj[info.shift()] = info.join(':')
+				})
 
-				self.deviceInformation(cmd, obj);
+				self.deviceInformation(cmd, obj)
 
-				self.stash = [];
-				self.command = null;
+				self.stash = []
+				self.command = null
+			} else {
+				self.log('debug', 'weird response from device', line, line.length)
 			}
-			else {
-				self.log('debug','weird response from device', line, line.length);
-			}
-		});
+		})
 	}
-};
+}
 
 // Return config fields for web config
 instance.prototype.config_fields = function () {
-	var self = this;
+	var self = this
 
 	return [
 		{
@@ -170,10 +166,10 @@ instance.prototype.config_fields = function () {
 			regex: self.REGEX_PORT,
 		},
 	]
-};
+}
 
 // When module gets deleted
-instance.prototype.destroy = function() {
+instance.prototype.destroy = function () {
 	var self = this
 
 	if (self.socket !== undefined) {
@@ -181,19 +177,19 @@ instance.prototype.destroy = function() {
 	}
 
 	debug('destroy', self.id)
-};
+}
 
 instance.prototype.update_variables = function (system) {
 	var self = this
 	var variables = []
-	
+
 	variables.push({
 		label: 'Streaming State',
-		name: 'stream_state'
-	});
-	
-	self.setVariable('stream_state', self.streaming);
-	self.setVariableDefinitions(variables);
+		name: 'stream_state',
+	})
+
+	self.setVariable('stream_state', self.streaming)
+	self.setVariableDefinitions(variables)
 
 	// feedbacks
 	var feedbacks = {}
@@ -206,37 +202,37 @@ instance.prototype.update_variables = function (system) {
 				type: 'colorpicker',
 				label: 'Foreground colour',
 				id: 'fg',
-				default: self.rgb(255,255,255)
+				default: self.rgb(255, 255, 255),
 			},
 			{
 				type: 'colorpicker',
 				label: 'Background colour',
 				id: 'bg',
-				default: self.rgb(0,255,0)
-			}
-		]
-	};
+				default: self.rgb(0, 255, 0),
+			},
+		],
+	}
 
-	self.setFeedbackDefinitions(feedbacks);
-};
+	self.setFeedbackDefinitions(feedbacks)
+}
 
-instance.prototype.feedback = function(feedback, bank) {
-	var self = this;
+instance.prototype.feedback = function (feedback, bank) {
+	var self = this
 
 	if (feedback.type == 'streaming_state') {
-		self.log('debug','status: ' + self.streaming)
+		self.log('debug', 'status: ' + self.streaming)
 		if (self.streaming === 'Streaming') {
 			return {
 				color: feedback.options.fg,
-				bgcolor: feedback.options.bg
-			};
+				bgcolor: feedback.options.bg,
+			}
 		}
 	}
-};
+}
 
 instance.prototype.init_presets = function () {
-	var self = this;
-	var presets = [];
+	var self = this
+	var presets = []
 
 	// Signal present
 	presets.push({
@@ -247,7 +243,7 @@ instance.prototype.init_presets = function () {
 			text: 'Start Stream',
 			size: 'auto',
 			color: '16777215',
-			bgcolor: self.rgb(0, 0, 0)
+			bgcolor: self.rgb(0, 0, 0),
 		},
 		actions: [
 			{
@@ -266,8 +262,8 @@ instance.prototype.init_presets = function () {
 				},
 			},
 		],
-	});
-	
+	})
+
 	presets.push({
 		category: 'Streaming',
 		label: 'Stop Stream',
@@ -276,7 +272,7 @@ instance.prototype.init_presets = function () {
 			text: 'Stop Stream',
 			size: 'auto',
 			color: '16777215',
-			bgcolor: self.rgb(0, 0, 0)
+			bgcolor: self.rgb(0, 0, 0),
 		},
 		actions: [
 			{
@@ -295,17 +291,16 @@ instance.prototype.init_presets = function () {
 				},
 			},
 		],
-	});
+	})
 
-	self.setPresetDefinitions(presets);
-};
+	self.setPresetDefinitions(presets)
+}
 
-instance.prototype.actions = function() {
-	var self = this;
+instance.prototype.actions = function () {
+	var self = this
 
 	self.system.emit('instance_actions', self.id, {
-
-		'stream': {
+		stream: {
 			label: 'Streaming Control',
 			options: [
 				{
@@ -316,11 +311,11 @@ instance.prototype.actions = function() {
 					choices: [
 						{ id: 'Start', label: 'Start' },
 						{ id: 'Stop', label: 'Stop' },
-					]
-				}
-			]
+					],
+				},
+			],
 		},
-		'stream_settings': {
+		stream_settings: {
 			label: 'Stream Settings',
 			options: [
 				{
@@ -353,9 +348,9 @@ instance.prototype.actions = function() {
 					id: 'key',
 					default: '',
 				},
-			]
+			],
 		},
-		'device': {
+		device: {
 			label: 'Device Control',
 			options: [
 				{
@@ -366,32 +361,46 @@ instance.prototype.actions = function() {
 					choices: [
 						{ id: 'Reboot', label: 'Reboot' },
 						{ id: 'Factory Reset', label: 'Factory Reset' },
-					]
-				}
-			]
+					],
+				},
+			],
 		},
-	});
+	})
 }
 
-instance.prototype.action = function(action) {
-
+instance.prototype.action = function (action) {
 	var self = this
 	var cmd
 
 	if (action.action === 'stream') {
 		cmd = 'STREAM STATE:\nAction: ' + action.options.stream_control + '\n\n'
-		self.log('debug',cmd)
+		self.log('debug', cmd)
 	}
-	
+
 	if (action.action === 'stream_settings') {
-		cmd = 'STREAM SETTINGS:\nVideo Mode: ' + action.options.video_mode + '\n' + 'Current Platform: ' + action.options.platform + '\n' + 'Current Server: ' + action.options.server + '\n' + 'Current Quality Level: ' + action.options.quality + '\n' + 'Stream Key: ' + action.options.key + '\n\n'
-		self.log('debug',cmd)
+		cmd =
+			'STREAM SETTINGS:\nVideo Mode: ' +
+			action.options.video_mode +
+			'\n' +
+			'Current Platform: ' +
+			action.options.platform +
+			'\n' +
+			'Current Server: ' +
+			action.options.server +
+			'\n' +
+			'Current Quality Level: ' +
+			action.options.quality +
+			'\n' +
+			'Stream Key: ' +
+			action.options.key +
+			'\n\n'
+		self.log('debug', cmd)
 		console.log(cmd)
 	}
-	
+
 	if (action.action === 'device') {
 		cmd = 'SHUTDOWN:\nAction: ' + action.options.device_control + '\n\n'
-		self.log('debug',cmd)
+		self.log('debug', cmd)
 	}
 
 	if (cmd !== undefined) {
@@ -401,7 +410,7 @@ instance.prototype.action = function(action) {
 			debug('Socket not connected :(')
 		}
 	}
-};
+}
 
 instance_skel.extendedBy(instance)
 exports = module.exports = instance
