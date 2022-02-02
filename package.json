@@ -1,8 +1,10 @@
 {
 	"name": "bmd-webpresenterhd",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"api_version": "1.0.0",
-	"keywords": [ "Streaming" ],
+	"keywords": [
+		"Streaming"
+	],
 	"manufacturer": "Blackmagic Design",
 	"product": "Web Presenter HD",
 	"shortname": "WebPresenterHD",
