@@ -30,24 +30,22 @@ instance.prototype.deviceInformation = function (key, data) {
 	// self.log('debug', 'device information process key: ' + key)
 
 	if (key == 'IDENTITY') {
-	
 		if (data['Label'] !== undefined) {
 			self.setVariable('label', data['Label'])
 			self.has_data = true
 		}
-		
+
 		if (data['Model'] !== undefined) {
 			self.setVariable('model', data['Model'])
 			self.has_data = true
 		}
 	}
-	
-	if (key == 'STREAM SETTINGS') {
 
+	if (key == 'STREAM SETTINGS') {
 		if (data['Available Video Modes'] !== undefined) {
 			m = data['Available Video Modes'].split(',')
 			self.formats = []
-			for (var i = 0; i < m.length; i ++) {
+			for (var i = 0; i < m.length; i++) {
 				self.formats.push({ id: m[i].trim(), label: m[i].trim() })
 			}
 			self.has_data = true
@@ -56,15 +54,15 @@ instance.prototype.deviceInformation = function (key, data) {
 			console.log(self.formats)
 			self.actions()
 		}
-		
+
 		if (data['Available Quality Levels'] !== undefined) {
 			q = data['Available Quality Levels'].split(',')
 			self.quality = []
-			for (var i = 0; i < q.length; i ++) {
+			for (var i = 0; i < q.length; i++) {
 				self.quality.push({ id: q[i].trim(), label: q[i].trim() })
 			}
 			self.has_data = true
-		
+
 			console.log('quality levels available from device:')
 			console.log(self.quality)
 			self.actions()
@@ -79,23 +77,23 @@ instance.prototype.deviceInformation = function (key, data) {
 			self.setVariable('quality', data['Current Quality Level'])
 			self.has_data = true
 		}
-		
+
 		if (data['Current Server'] !== undefined) {
 			self.setVariable('server', data['Current Server'])
 			self.has_data = true
 		}
-		
+
 		if (data['Current Platform'] !== undefined) {
 			self.setVariable('platform', data['Current Platform'])
 			self.has_data = true
 		}
-		
+
 		if (data['Stream Key'] !== undefined) {
 			self.setVariable('key', data['Stream Key'])
 			self.has_data = true
 		}
-	}	
-	
+	}
+
 	if (key == 'STREAM STATE') {
 		// self.log('debug','data = ' + data);
 
@@ -164,8 +162,8 @@ instance.prototype.init_tcp = function () {
 		self.socket.on('data', function (chunk) {
 			console.log('data received')
 			var i = 0,
-			line = '',
-			offset = 0
+				line = '',
+				offset = 0
 			receivebuffer += chunk
 
 			while ((i = receivebuffer.indexOf('\n', offset)) !== -1) {
