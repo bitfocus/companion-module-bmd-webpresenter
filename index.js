@@ -24,6 +24,7 @@ function instance(system) {
 }
 
 instance.prototype.deviceInformation = function (key, data) {
+<<<<<<< HEAD
   var self = this;
   var oldHasData = (self.has_data = true);
 
@@ -111,6 +112,95 @@ instance.prototype.deviceInformation = function (key, data) {
     self.update_variables();
   }
 };
+=======
+	var self = this
+	var oldHasData = (self.has_data = true)
+
+	// self.log('debug', 'device information process key: ' + key)
+
+	if (key == 'IDENTITY') {
+		if (data['Label'] !== undefined) {
+			self.setVariable('label', data['Label'])
+			self.has_data = true
+		}
+
+		if (data['Model'] !== undefined) {
+			self.setVariable('model', data['Model'])
+			self.has_data = true
+		}
+	}
+
+	if (key == 'STREAM SETTINGS') {
+		if (data['Available Video Modes'] !== undefined) {
+			m = data['Available Video Modes'].split(',')
+			self.formats = []
+			for (var i = 0; i < m.length; i++) {
+				self.formats.push({ id: m[i].trim(), label: m[i].trim() })
+			}
+			self.has_data = true
+
+			console.log('formats available from device:')
+			console.log(self.formats)
+			self.actions()
+		}
+
+		if (data['Available Quality Levels'] !== undefined) {
+			q = data['Available Quality Levels'].split(',')
+			self.quality = []
+			for (var i = 0; i < q.length; i++) {
+				self.quality.push({ id: q[i].trim(), label: q[i].trim() })
+			}
+			self.has_data = true
+
+			console.log('quality levels available from device:')
+			console.log(self.quality)
+			self.actions()
+		}
+
+		if (data['Video Mode'] !== undefined) {
+			self.setVariable('video_mode', data['Video Mode'])
+			self.has_data = true
+		}
+
+		if (data['Current Quality Level'] !== undefined) {
+			self.setVariable('quality', data['Current Quality Level'])
+			self.has_data = true
+		}
+
+		if (data['Current Server'] !== undefined) {
+			self.setVariable('server', data['Current Server'])
+			self.has_data = true
+		}
+
+		if (data['Current Platform'] !== undefined) {
+			self.setVariable('platform', data['Current Platform'])
+			self.has_data = true
+		}
+
+		if (data['Stream Key'] !== undefined) {
+			self.setVariable('key', data['Stream Key'])
+			self.has_data = true
+		}
+	}
+
+	if (key == 'STREAM STATE') {
+		// self.log('debug','data = ' + data);
+
+		if (data['Status'] !== undefined) {
+			self.streaming = data['Status']
+			self.setVariable('stream_state', self.streaming)
+			self.checkFeedbacks('streaming_state')
+			self.has_data = true
+		}
+	}
+
+	// Initial data from device
+	if (oldHasData != self.has_data && self.has_data) {
+		self.checkFeedbacks()
+		self.update_variables()
+	}
+}
+>>>>>>> 54af2b58f0cf3917fedfa3263fc386f615311e9e
 
 instance.prototype.updateConfig = function (config) {
   var self = this;
@@ -132,6 +222,7 @@ instance.prototype.init = function () {
 };
 
 instance.prototype.init_tcp = function () {
+<<<<<<< HEAD
   var self = this;
   var receivebuffer = "";
 
@@ -203,6 +294,79 @@ instance.prototype.init_tcp = function () {
     });
   }
 };
+=======
+	var self = this
+	var receivebuffer = ''
+
+	if (self.socket !== undefined) {
+		self.socket.destroy()
+		delete self.socket
+	}
+
+	self.has_data = false
+
+	if (self.config.host) {
+		self.socket = new tcp(self.config.host, self.config.port)
+
+		self.socket.on('status_change', function (status, message) {
+			self.status(status, message)
+		})
+
+		self.socket.on('error', function (err) {
+			debug('Network error', err)
+			self.log('error', 'Network error: ' + err.message)
+		})
+
+		self.socket.on('connect', function () {
+			debug('Connected')
+		})
+
+		// separate buffered stream into lines with responses
+		self.socket.on('data', function (chunk) {
+			console.log('data received')
+			var i = 0,
+				line = '',
+				offset = 0
+			receivebuffer += chunk
+
+			while ((i = receivebuffer.indexOf('\n', offset)) !== -1) {
+				line = receivebuffer.substr(offset, i - offset)
+				offset = i + 1
+				if (line.toString() != 'ACK') {
+					self.socket.emit('receiveline', line.toString())
+					console.log(line.toString())
+				}
+			}
+
+			receivebuffer = receivebuffer.substr(offset)
+		})
+
+		self.socket.on('receiveline', function (line) {
+			if (self.command === null && line.match(/:/)) {
+				self.command = line
+				console.log('command: ' + line)
+			} else if (self.command !== null && line.length > 0) {
+				self.stash.push(line.trim())
+			} else if (line.length === 0 && self.command !== null) {
+				var cmd = self.command.trim().split(/:/)[0]
+
+				var obj = {}
+				self.stash.forEach(function (val) {
+					var info = val.split(/\s*:\s*/)
+					obj[info.shift()] = info.join(':')
+				})
+
+				self.deviceInformation(cmd, obj)
+
+				self.stash = []
+				self.command = null
+			} else {
+				console.log('weird response from device: ' + line)
+			}
+		})
+	}
+}
+>>>>>>> 54af2b58f0cf3917fedfa3263fc386f615311e9e
 
 // Return config fields for web config
 instance.prototype.config_fields = function () {
