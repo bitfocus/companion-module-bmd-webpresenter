@@ -1,13 +1,15 @@
 {
 	"name": "bmd-webpresenterhd",
-	"version": "1.0.2",
+	"version": "1.0.3",
 	"api_version": "1.0.0",
 	"keywords": [
-		"Streaming"
+		"Streaming", "Web Encoder", "Livestream"
 	],
 	"manufacturer": "Blackmagic Design",
-	"product": "Web Presenter HD",
-	"shortname": "WebPresenterHD",
+	"product": [ 
+		"Web Presenter HD", "Web Presenter 4K" 
+	],
+	"shortname": "WebPresenter",
 	"description": "Live stream from any 12G‑SDI video source direct to YouTube, Facebook, Twitter and more",
 	"main": "index.js",
 	"scripts": {

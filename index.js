@@ -1,4 +1,4 @@
-// BlackMagic Design Web Presenter HD
+// BlackMagic Design Web Presenter HD and 4K
 
 var tcp = require('../../tcp')
 var instance_skel = require('../../instance_skel')
@@ -12,6 +12,8 @@ function instance(system) {
 	self.request_id = 0
 	self.stash = []
 	self.command = null
+	self.formats = []
+	self.quality = []
 
 	// super-constructor
 	instance_skel.apply(this, arguments)
@@ -25,8 +27,75 @@ instance.prototype.deviceInformation = function (key, data) {
 	var self = this
 	var oldHasData = (self.has_data = true)
 
-	self.log('debug', 'device information process key: ' + key)
+	// self.log('debug', 'device information process key: ' + key)
 
+	if (key == 'IDENTITY') {
+	
+		if (data['Label'] !== undefined) {
+			self.setVariable('label', data['Label'])
+			self.has_data = true
+		}
+		
+		if (data['Model'] !== undefined) {
+			self.setVariable('model', data['Model'])
+			self.has_data = true
+		}
+	}
+	
+	if (key == 'STREAM SETTINGS') {
+
+		if (data['Available Video Modes'] !== undefined) {
+			m = data['Available Video Modes'].split(',')
+			self.formats = []
+			for (var i = 0; i < m.length; i ++) {
+				self.formats.push({ id: m[i].trim(), label: m[i].trim() })
+			}
+			self.has_data = true
+
+			console.log('formats available from device:')
+			console.log(self.formats)
+			self.actions()
+		}
+		
+		if (data['Available Quality Levels'] !== undefined) {
+			q = data['Available Quality Levels'].split(',')
+			self.quality = []
+			for (var i = 0; i < q.length; i ++) {
+				self.quality.push({ id: q[i].trim(), label: q[i].trim() })
+			}
+			self.has_data = true
+		
+			console.log('quality levels available from device:')
+			console.log(self.quality)
+			self.actions()
+		}
+
+		if (data['Video Mode'] !== undefined) {
+			self.setVariable('video_mode', data['Video Mode'])
+			self.has_data = true
+		}
+
+		if (data['Current Quality Level'] !== undefined) {
+			self.setVariable('quality', data['Current Quality Level'])
+			self.has_data = true
+		}
+		
+		if (data['Current Server'] !== undefined) {
+			self.setVariable('server', data['Current Server'])
+			self.has_data = true
+		}
+		
+		if (data['Current Platform'] !== undefined) {
+			self.setVariable('platform', data['Current Platform'])
+			self.has_data = true
+		}
+		
+		if (data['Stream Key'] !== undefined) {
+			self.setVariable('key', data['Stream Key'])
+			self.has_data = true
+		}
+	}	
+	
 	if (key == 'STREAM STATE') {
 		// self.log('debug','data = ' + data);
 
@@ -35,7 +104,6 @@ instance.prototype.deviceInformation = function (key, data) {
 			self.setVariable('stream_state', self.streaming)
 			self.checkFeedbacks('streaming_state')
 			self.has_data = true
-			self.log('debug', self.streaming)
 		}
 	}
 
@@ -94,17 +162,19 @@ instance.prototype.init_tcp = function () {
 
 		// separate buffered stream into lines with responses
 		self.socket.on('data', function (chunk) {
-			self.log('debug', 'data received')
+			console.log('data received')
 			var i = 0,
-				line = '',
-				offset = 0
+			line = '',
+			offset = 0
 			receivebuffer += chunk
 
 			while ((i = receivebuffer.indexOf('\n', offset)) !== -1) {
 				line = receivebuffer.substr(offset, i - offset)
 				offset = i + 1
-				self.socket.emit('receiveline', line.toString())
-				self.log('debug', line.toString())
+				if (line.toString() != 'ACK') {
+					self.socket.emit('receiveline', line.toString())
+					console.log(line.toString())
+				}
 			}
 
 			receivebuffer = receivebuffer.substr(offset)
@@ -113,13 +183,11 @@ instance.prototype.init_tcp = function () {
 		self.socket.on('receiveline', function (line) {
 			if (self.command === null && line.match(/:/)) {
 				self.command = line
-				self.log('debug', 'command: ' + line)
+				console.log('command: ' + line)
 			} else if (self.command !== null && line.length > 0) {
 				self.stash.push(line.trim())
 			} else if (line.length === 0 && self.command !== null) {
 				var cmd = self.command.trim().split(/:/)[0]
-
-				self.log('debug', 'COMMAND: ' + cmd)
 
 				var obj = {}
 				self.stash.forEach(function (val) {
@@ -132,7 +200,7 @@ instance.prototype.init_tcp = function () {
 				self.stash = []
 				self.command = null
 			} else {
-				self.log('debug', 'weird response from device', line, line.length)
+				console.log('weird response from device: ' + line)
 			}
 		})
 	}
@@ -148,7 +216,7 @@ instance.prototype.config_fields = function () {
 			id: 'info',
 			width: 12,
 			label: 'Information',
-			value: 'This module will allow you to control the Blackmagic Web Presenter HD.',
+			value: 'This module will allow you to control the Blackmagic Web Presenter HD or 4K.',
 		},
 		{
 			type: 'textinput',
@@ -183,10 +251,40 @@ instance.prototype.update_variables = function (system) {
 	var self = this
 	var variables = []
 
-	variables.push({
-		label: 'Streaming State',
-		name: 'stream_state',
-	})
+	variables.push(
+		{
+			label: 'Device Model',
+			name: 'model',
+		},
+		{
+			label: 'Device Label',
+			name: 'label',
+		},
+		{
+			label: 'Video Standard',
+			name: 'video_mode',
+		},
+		{
+			label: 'Platform',
+			name: 'platform',
+		},
+		{
+			label: 'Server',
+			name: 'server',
+		},
+		{
+			label: 'Stream Key',
+			name: 'key',
+		},
+		{
+			label: 'Stream Quality',
+			name: 'quality',
+		},
+		{
+			label: 'Streaming State',
+			name: 'stream_state',
+		}
+	)
 
 	self.setVariable('stream_state', self.streaming)
 	self.setVariableDefinitions(variables)
@@ -220,7 +318,7 @@ instance.prototype.feedback = function (feedback, bank) {
 	var self = this
 
 	if (feedback.type == 'streaming_state') {
-		self.log('debug', 'status: ' + self.streaming)
+		console.log('update feedback status: ' + self.streaming)
 		if (self.streaming === 'Streaming') {
 			return {
 				color: feedback.options.fg,
@@ -319,10 +417,11 @@ instance.prototype.actions = function () {
 			label: 'Stream Settings',
 			options: [
 				{
-					type: 'textinput',
+					type: 'dropdown',
 					label: 'Video Mode',
 					id: 'video_mode',
 					default: 'Auto',
+					choices: self.formats,
 				},
 				{
 					type: 'textinput',
@@ -337,10 +436,11 @@ instance.prototype.actions = function () {
 					default: 'Primary',
 				},
 				{
-					type: 'textinput',
+					type: 'dropdown',
 					label: 'Quality',
 					id: 'quality',
 					default: 'Streaming Medium',
+					choices: self.quality,
 				},
 				{
 					type: 'textinput',
@@ -394,20 +494,20 @@ instance.prototype.action = function (action) {
 			'Stream Key: ' +
 			action.options.key +
 			'\n\n'
-		self.log('debug', cmd)
+		// self.log('debug', cmd)
 		console.log(cmd)
 	}
 
 	if (action.action === 'device') {
 		cmd = 'SHUTDOWN:\nAction: ' + action.options.device_control + '\n\n'
-		self.log('debug', cmd)
+		// self.log('debug', cmd)
 	}
 
 	if (cmd !== undefined) {
 		if (self.socket !== undefined && self.socket.connected) {
 			self.socket.send(cmd)
 		} else {
-			debug('Socket not connected :(')
+			debug('Socket not connected')
 		}
 	}
 }
