@@ -259,7 +259,7 @@ instance.prototype.update_variables = function (system) {
 			name: 'label',
 		},
 		{
-			label: 'Video Standard',
+			label: 'Video Mode',
 			name: 'video_mode',
 		},
 		{
