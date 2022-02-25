@@ -76,7 +76,7 @@ instance.prototype.deviceInformation = function (key, data) {
 				self.platforms.push({ id: p[i].trim(), label: p[i].trim() })
 			}
 			self.has_data = true
-		
+
 			console.log('platforms available from device:')
 			console.log(self.platforms)
 			self.actions()
