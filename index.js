@@ -14,6 +14,7 @@ function instance(system) {
 	self.command = null
 	self.formats = []
 	self.quality = []
+	self.platforms = []
 
 	// super-constructor
 	instance_skel.apply(this, arguments)
@@ -65,6 +66,19 @@ instance.prototype.deviceInformation = function (key, data) {
 
 			console.log('quality levels available from device:')
 			console.log(self.quality)
+			self.actions()
+		}
+
+		if (data['Available Default Platforms'] !== undefined) {
+			p = data['Available Default Platforms'].split(',')
+			self.platforms = []
+			for (var i = 0; i < p.length; i++) {
+				self.platforms.push({ id: p[i].trim(), label: p[i].trim() })
+			}
+			self.has_data = true
+		
+			console.log('platforms available from device:')
+			console.log(self.platforms)
 			self.actions()
 		}
 
@@ -197,8 +211,8 @@ instance.prototype.init_tcp = function () {
 
 				self.stash = []
 				self.command = null
-			} else {
-				console.log('weird response from device: ' + line)
+			} else if (line.length > 0) {
+				console.log('weird response from device: ' + line.toString() + ' ' + line.length)
 			}
 		})
 	}
@@ -422,16 +436,25 @@ instance.prototype.actions = function () {
 					choices: self.formats,
 				},
 				{
-					type: 'textinput',
+					type: 'dropdown',
 					label: 'Platform',
 					id: 'platform',
 					default: 'YouTube',
+					choices: self.platforms,
 				},
 				{
 					type: 'textinput',
 					label: 'Server',
 					id: 'server',
-					default: 'Primary',
+					default: '',
+					tooltip: 'Depends on platform.\nRefer to Blackmagic Web Presenter desktop application for possible options.',
+				},
+				{
+					type: 'textinput',
+					label: 'Stream Key',
+					id: 'key',
+					default: '',
+					tooltip: 'Provided by the streaming platform.',
 				},
 				{
 					type: 'dropdown',
@@ -439,12 +462,6 @@ instance.prototype.actions = function () {
 					id: 'quality',
 					default: 'Streaming Medium',
 					choices: self.quality,
-				},
-				{
-					type: 'textinput',
-					label: 'Stream Key',
-					id: 'key',
-					default: '',
 				},
 			],
 		},
