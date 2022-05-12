@@ -82,6 +82,23 @@ instance.prototype.deviceInformation = function (key, data) {
 			self.actions()
 		}
 
+		// also list custom platforms in select list
+		if (data['Available Custom Platforms'] !== undefined) {
+			p = data['Available Custom Platforms'].split(',')
+			if (!self.platforms) {
+				self.platforms = [];
+			}
+			// add custom platforms to the list of default platforms
+			for (var i = 0; i < p.length; i++) {
+				self.platforms.push({ id: p[i].trim(), label: p[i].trim() })
+			}
+			self.has_data = true
+
+			console.log('platforms available from device:')
+			console.log(self.platforms)
+			self.actions()
+		}
+
 		if (data['Video Mode'] !== undefined) {
 			self.setVariable('video_mode', data['Video Mode'])
 			self.has_data = true
