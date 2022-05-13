@@ -86,7 +86,7 @@ instance.prototype.deviceInformation = function (key, data) {
 		if (data['Available Custom Platforms'] !== undefined) {
 			p = data['Available Custom Platforms'].split(',')
 			if (!self.platforms) {
-				self.platforms = [];
+				self.platforms = []
 			}
 			// add custom platforms to the list of default platforms
 			for (var i = 0; i < p.length; i++) {
