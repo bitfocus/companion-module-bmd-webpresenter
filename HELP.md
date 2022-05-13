@@ -19,3 +19,5 @@ Add support for both 4K and HD
 Add more variables for monitoring
 Retrieve the 'Video Mode', 'Quality' and 'Platform' options from device
 
+## Version 1.0.4
+Add support for custom streaming profiles
