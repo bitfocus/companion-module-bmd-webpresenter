@@ -438,6 +438,7 @@ instance.prototype.actions = function () {
 					choices: [
 						{ id: 'Start', label: 'Start' },
 						{ id: 'Stop', label: 'Stop' },
+						{ id: 'Toggle', label: 'Toggle' },
 					],
 				},
 			],
@@ -505,7 +506,15 @@ instance.prototype.action = function (action) {
 	var cmd
 
 	if (action.action === 'stream') {
-		cmd = 'STREAM STATE:\nAction: ' + action.options.stream_control + '\n\n'
+		if (action.options.stream_control === 'Toggle') {
+			if (self.streaming === 'Streaming') {
+				cmd = 'STREAM STATE:\nAction: Stop\n\n'
+			} else {
+				cmd = 'STREAM STATE:\nAction: Start\n\n'
+			}
+		} else {
+			cmd = 'STREAM STATE:\nAction: ' + action.options.stream_control + '\n\n'
+		}
 		self.log('debug', cmd)
 	}
 

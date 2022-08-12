@@ -27,3 +27,6 @@ Add support for custom streaming profiles
 
 ## Version 1.0.5
 Add help text
+
+## Version 1.0.6
+Add streaming control 'Toggle' option
