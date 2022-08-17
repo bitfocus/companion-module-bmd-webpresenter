@@ -126,12 +126,23 @@ instance.prototype.deviceInformation = function (key, data) {
 	}
 
 	if (key == 'STREAM STATE') {
-		// self.log('debug','data = ' + data);
+		console.log('stream state = ' + data);
 
 		if (data['Status'] !== undefined) {
+			
 			self.streaming = data['Status']
 			self.setVariable('stream_state', self.streaming)
 			self.checkFeedbacks('streaming_state')
+			
+			self.duration = data['Duration']
+			self.setVariable('stream_duration', self.duration)
+			
+			self.bitrate = data['Bitrate']
+			self.setVariable('stream_bitrate', self.bitrate)
+			
+			self.cache = data['Cache Used']
+			self.setVariable('cache', self.cache)
+			
 			self.has_data = true
 		}
 	}
@@ -155,11 +166,25 @@ instance.prototype.init = function () {
 
 	debug = self.debug
 	log = self.log
-
+	self.timer = undefined
 	self.init_tcp()
 
 	self.update_variables() // export variables
 	self.init_presets()
+}
+
+instance.prototype.dataPoller = function () {
+	const self = this
+
+	if (self.socket === undefined) {
+		return
+	}
+
+	if (self.socket.connected) {
+		self.socket.send('STREAM STATE:\n\n')
+	} else {
+		debug('Socket not connected')
+	}
 }
 
 instance.prototype.init_tcp = function () {
@@ -187,6 +212,8 @@ instance.prototype.init_tcp = function () {
 
 		self.socket.on('connect', function () {
 			debug('Connected')
+			// poll every second
+			self.timer = setInterval(self.dataPoller.bind(self), 1000)
 		})
 
 		// separate buffered stream into lines with responses
@@ -312,6 +339,18 @@ instance.prototype.update_variables = function (system) {
 		{
 			label: 'Streaming State',
 			name: 'stream_state',
+		},
+		{
+			label: 'Streaming Duration',
+			name: 'stream_duration',
+		},
+		{
+			label: 'Stream Bitrate',
+			name: 'stream_bitrate',
+		},
+		{
+			label: 'Cache Used',
+			name: 'cache',
 		}
 	)
 
@@ -507,7 +546,7 @@ instance.prototype.action = function (action) {
 
 	if (action.action === 'stream') {
 		if (action.options.stream_control === 'Toggle') {
-			if (self.streaming === 'Streaming') {
+			if (self.streaming === 'Streaming' || self.streaming === 'Connecting') {
 				cmd = 'STREAM STATE:\nAction: Stop\n\n'
 			} else {
 				cmd = 'STREAM STATE:\nAction: Start\n\n'
