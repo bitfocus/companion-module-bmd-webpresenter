@@ -126,23 +126,22 @@ instance.prototype.deviceInformation = function (key, data) {
 	}
 
 	if (key == 'STREAM STATE') {
-		console.log('stream state = ' + data);
+		console.log('stream state = ' + data)
 
 		if (data['Status'] !== undefined) {
-			
 			self.streaming = data['Status']
 			self.setVariable('stream_state', self.streaming)
 			self.checkFeedbacks('streaming_state')
-			
+
 			self.duration = data['Duration']
 			self.setVariable('stream_duration', self.duration)
-			
+
 			self.bitrate = data['Bitrate']
 			self.setVariable('stream_bitrate', self.bitrate)
-			
+
 			self.cache = data['Cache Used']
 			self.setVariable('cache', self.cache)
-			
+
 			self.has_data = true
 		}
 	}
