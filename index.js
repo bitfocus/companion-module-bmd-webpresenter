@@ -207,6 +207,7 @@ instance.prototype.init_tcp = function () {
 		self.socket.on('error', function (err) {
 			debug('Network error', err)
 			self.log('error', 'Network error: ' + err.message)
+			clearInterval(self.timer)
 		})
 
 		self.socket.on('connect', function () {
@@ -294,6 +295,11 @@ instance.prototype.config_fields = function () {
 // When module gets deleted
 instance.prototype.destroy = function () {
 	var self = this
+
+	if (self.timer) {
+		clearInterval(self.timer)
+		delete self.timer
+	}
 
 	if (self.socket !== undefined) {
 		self.socket.destroy()
