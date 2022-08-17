@@ -126,7 +126,7 @@ instance.prototype.deviceInformation = function (key, data) {
 	}
 
 	if (key == 'STREAM STATE') {
-		console.log('stream state = ' + data)
+		// console.log('stream state = ' + data)
 
 		if (data['Status'] !== undefined) {
 			self.streaming = data['Status']
@@ -168,7 +168,7 @@ instance.prototype.init = function () {
 	self.timer = undefined
 	self.init_tcp()
 
-	self.update_variables() // export variables
+	self.update_variables()
 	self.init_presets()
 }
 
@@ -217,7 +217,7 @@ instance.prototype.init_tcp = function () {
 
 		// separate buffered stream into lines with responses
 		self.socket.on('data', function (chunk) {
-			console.log('data received')
+			// console.log('data received')
 			var i = 0,
 				line = '',
 				offset = 0
@@ -228,7 +228,7 @@ instance.prototype.init_tcp = function () {
 				offset = i + 1
 				if (line.toString() != 'ACK') {
 					self.socket.emit('receiveline', line.toString())
-					console.log(line.toString())
+					// console.log(line.toString())
 				}
 			}
 
@@ -238,7 +238,7 @@ instance.prototype.init_tcp = function () {
 		self.socket.on('receiveline', function (line) {
 			if (self.command === null && line.match(/:/)) {
 				self.command = line
-				console.log('command: ' + line)
+				// console.log('command: ' + line)
 			} else if (self.command !== null && line.length > 0) {
 				self.stash.push(line.trim())
 			} else if (line.length === 0 && self.command !== null) {
@@ -399,7 +399,6 @@ instance.prototype.init_presets = function () {
 	var self = this
 	var presets = []
 
-	// Signal present
 	presets.push({
 		category: 'Streaming',
 		label: 'Start Stream',
