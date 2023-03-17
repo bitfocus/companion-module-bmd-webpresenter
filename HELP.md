@@ -33,3 +33,5 @@ Add streaming control 'Toggle' option
 
 Added variables for stream duration, bitrate and cache level
 
+## Version 1.0.7
+Add additional variables for stream durations (hours, minutes, seconds)
