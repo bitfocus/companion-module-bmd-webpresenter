@@ -135,9 +135,9 @@ instance.prototype.deviceInformation = function (key, data) {
 
 			self.duration = data['Duration']
 			self.setVariable('stream_duration', self.duration)
-			self.setVariable('stream_duration_HH', self.duration.substring(0, 2))
-			self.setVariable('stream_duration_MM', self.duration.substring(3, 5))
-			self.setVariable('stream_duration_SS', self.duration.substring(6, 8))
+			self.setVariable('stream_duration_HH', self.duration.substring(3, 5))
+			self.setVariable('stream_duration_MM', self.duration.substring(6, 8))
+			self.setVariable('stream_duration_SS', self.duration.substring(9, 11))
 
 			self.bitrate = data['Bitrate']
 			self.setVariable('stream_bitrate', self.bitrate)
