@@ -1,28 +1,20 @@
 {
-	"name": "bmd-webpresenterhd",
-	"version": "1.0.7",
-	"api_version": "1.0.0",
-	"keywords": [
-		"Streaming", "Web Encoder", "Livestream"
-	],
-	"manufacturer": "Blackmagic Design",
-	"product": [ 
-		"Web Presenter HD", "Web Presenter 4K" 
-	],
-	"shortname": "WebPresenter",
-	"description": "Live stream from any 12G‑SDI video source direct to YouTube, Facebook, Twitter and more",
+	"name": "bmd-webpresenter",
+	"version": "2.0.0",
 	"main": "index.js",
+	"type": "module",
 	"scripts": {
 		"test": "echo \"Error: no test specified\" && exit 1"
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/bitfocus/companion-module-bmd-webpresenterhd.git"
+		"url": "git+https://github.com/bitfocus/companion-module-bmd-webpresenter.git"
 	},
-	"author": "Peter Daniel",
 	"license": "MIT",
-	"bugs": {
-		"url": "https://github.com/bitfocus/companion-module-bmd-webpresenterhd/issues"
+	"dependencies": {
+		"@companion-module/base": "~1.0.2"
 	},
-	"homepage": "https://github.com/bitfocus/companion-module-bmd-webpresenerhd#readme"
+	"devDependencies": {
+		"@companion-module/tools": "^0.5.1"
+	}
 }
