@@ -33,11 +33,10 @@ Add streaming control 'Toggle' option
 
 Added variables for stream duration, bitrate and cache level
 
-## Version 1.0.7
-Add additional variables for stream durations (hours, minutes, seconds)
-
 ## Version 2.0.0
 Update for Companion 3
+
+Add additional variables for stream durations (hours, minutes, seconds)
 
 Add additional feedback states
 
