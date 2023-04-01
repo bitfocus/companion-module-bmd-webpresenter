@@ -11,8 +11,8 @@ export function updatePresets() {
 		style: {
 			text: 'Start Stream',
 			size: 'auto',
-			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
+			color: combineRgb(255, 255, 255),
 		},
 		steps: [
 			{
@@ -68,8 +68,8 @@ export function updatePresets() {
 		style: {
 			text: 'Stop Stream',
 			size: 'auto',
-			color: combineRgb(255, 255, 255),
 			bgcolor: combineRgb(0, 0, 0),
+			color: combineRgb(255, 255, 255),
 		},
 		steps: [
 			{
