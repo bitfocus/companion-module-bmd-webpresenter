@@ -38,4 +38,6 @@ Add additional variables for stream durations (hours, minutes, seconds)
 
 ## Version 2.0.0
 Update for Companion 3
+
 Add additional feedback states
+
