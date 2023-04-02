@@ -1,5 +1,4 @@
 export function updateVariables() {
-
 	let variables = []
 
 	variables.push(

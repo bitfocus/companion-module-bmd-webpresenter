@@ -12,22 +12,22 @@ export function updateActions() {
 				choices: [
 					{ id: 'Start', label: 'Start' },
 					{ id: 'Stop', label: 'Stop' },
-					{ id: 'Toggle', label: 'Toggle' }
-				]
-			}
+					{ id: 'Toggle', label: 'Toggle' },
+				],
+			},
 		],
 		callback: ({ options }) => {
-				var cmd = 'STREAM STATE:\nAction: '
-				if (options.stream_control === 'Toggle') {
-					if (this.streaming === 'Streaming' || this.streaming === 'Connecting') {
-						cmd = cmd + 'Stop\n\n'
-					} else {
-						cmd = cmd + 'Start\n\n'
-					}
+			var cmd = 'STREAM STATE:\nAction: '
+			if (options.stream_control === 'Toggle') {
+				if (this.streaming === 'Streaming' || this.streaming === 'Connecting') {
+					cmd = cmd + 'Stop\n\n'
 				} else {
-					cmd = cmd + options.stream_control + '\n\n'
+					cmd = cmd + 'Start\n\n'
 				}
-				this.sendCommand(cmd)
+			} else {
+				cmd = cmd + options.stream_control + '\n\n'
+			}
+			this.sendCommand(cmd)
 		},
 	}
 
@@ -67,8 +67,8 @@ export function updateActions() {
 				label: 'Quality',
 				id: 'quality',
 				default: 'Streaming Medium',
-				choices: this.quality
-			}
+				choices: this.quality,
+			},
 		],
 		callback: ({ options }) => {
 			var cmd =
@@ -101,9 +101,9 @@ export function updateActions() {
 				default: 'Reboot',
 				choices: [
 					{ id: 'Reboot', label: 'Reboot' },
-					{ id: 'Factory Reset', label: 'Factory Reset' }
-				]
-			}
+					{ id: 'Factory Reset', label: 'Factory Reset' },
+				],
+			},
 		],
 		callback: ({ options }) => {
 			var cmd = 'SHUTDOWN:\nAction: ' + options.device_control + '\n\n'

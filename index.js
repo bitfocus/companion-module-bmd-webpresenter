@@ -1,20 +1,13 @@
 // BlackMagic Design Web Presenter HD and 4K
 
-import {
-	InstanceBase,
-	Regex,
-	runEntrypoint,
-	TCPHelper,
-} from '@companion-module/base'
+import { InstanceBase, Regex, runEntrypoint, TCPHelper } from '@companion-module/base'
 import { updateActions } from './actions.js'
 import { updateFeedbacks } from './feedback.js'
 import { updatePresets } from './presets.js'
 import { updateVariables } from './variables.js'
 import { upgradeScripts } from './upgrades.js'
 
-
 class WebPresenter extends InstanceBase {
-
 	constructor(internal) {
 		super(internal)
 
@@ -22,7 +15,6 @@ class WebPresenter extends InstanceBase {
 		this.updateFeedbacks = updateFeedbacks.bind(this)
 		this.updatePresets = updatePresets.bind(this)
 		this.updateVariables = updateVariables.bind(this)
-
 	}
 
 	getConfigFields() {
@@ -67,27 +59,25 @@ class WebPresenter extends InstanceBase {
 	}
 
 	async init(config) {
+		console.log('init WebPresenter')
 
-			console.log('init WebPresenter')
+		this.config = config
+		this.request_id = 0
+		this.stash = []
+		this.command = null
+		this.formats = []
+		this.quality = []
+		this.platforms = []
+		this.timer = undefined
 
-			this.config = config
-			this.request_id = 0
-			this.stash = []
-			this.command = null
-			this.formats = []
-			this.quality = []
-			this.platforms = []
-			this.timer = undefined
+		console.log(this.config)
 
-			console.log(this.config)
+		this.updateActions()
+		this.updateVariables()
+		this.updateFeedbacks()
+		this.updatePresets()
 
-			this.updateActions()
-			this.updateVariables()
-			this.updateFeedbacks()
-			this.updatePresets()
-
-			this.initTCP()
-
+		this.initTCP()
 	}
 
 	initTCP() {
@@ -104,16 +94,16 @@ class WebPresenter extends InstanceBase {
 			this.socket = new TCPHelper(this.config.host, this.config.port)
 
 			this.socket.on('status_change', (status, message) => {
-				this.updateStatus(status, message);
+				this.updateStatus(status, message)
 			})
 
 			this.socket.on('error', (err) => {
-				console.log('Network error', err);
-				this.log('error', 'Network error: ' + err.message);
+				console.log('Network error', err)
+				this.log('error', 'Network error: ' + err.message)
 			})
 
 			this.socket.on('connect', () => {
-				console.log("Connected")
+				console.log('Connected')
 				// poll every second
 				this.timer = setInterval(this.dataPoller.bind(this), 1000)
 			})
@@ -162,18 +152,17 @@ class WebPresenter extends InstanceBase {
 	}
 
 	processDeviceInformation(key, data) {
-
 		console.log('device information process key : ' + key)
 		console.log('device information process data:')
 		console.info(data)
 
 		if (key == 'IDENTITY') {
 			if (data['Label'] !== undefined) {
-				this.setVariableValues({ 'label': data['Label'] })
+				this.setVariableValues({ label: data['Label'] })
 			}
 
 			if (data['Model'] !== undefined) {
-				this.setVariableValues({ 'model': data['Model'] })
+				this.setVariableValues({ model: data['Model'] })
 			}
 		}
 
@@ -208,7 +197,7 @@ class WebPresenter extends InstanceBase {
 				for (var i = 0; i < p.length; i++) {
 					this.platforms.push({ id: p[i].trim(), label: p[i].trim() })
 				}
-	
+
 				console.log('platforms available from device:')
 				console.log(this.platforms)
 				this.updateActions()
@@ -231,42 +220,41 @@ class WebPresenter extends InstanceBase {
 			}
 
 			if (data['Video Mode'] !== undefined) {
-				this.setVariableValues({ 'video_mode': data['Video Mode'] })
+				this.setVariableValues({ video_mode: data['Video Mode'] })
 			}
 
 			if (data['Current Quality Level'] !== undefined) {
-				this.setVariableValues({ 'quality': data['Current Quality Level'] })
+				this.setVariableValues({ quality: data['Current Quality Level'] })
 			}
 
 			if (data['Current Server'] !== undefined) {
-				this.setVariableValues({ 'server': data['Current Server'] })
+				this.setVariableValues({ server: data['Current Server'] })
 			}
 
 			if (data['Current Platform'] !== undefined) {
-				this.setVariableValues({ 'platform': data['Current Platform'] })
+				this.setVariableValues({ platform: data['Current Platform'] })
 			}
 
 			if (data['Stream Key'] !== undefined) {
-				this.setVariableValues({ 'key': data['Stream Key'] })
+				this.setVariableValues({ key: data['Stream Key'] })
 			}
 		}
 
-		if (key == 'STREAM STATE') {	
+		if (key == 'STREAM STATE') {
 			if (data['Status'] !== undefined) {
-				
 				this.streaming = data['Status']
 				this.duration = data['Duration']
 				this.bitrate = data['Bitrate']
 				this.cache = data['Cache Used']
 
 				this.setVariableValues({
-					'stream_state': this.streaming,
-					'stream_duration': this.duration,
-					'stream_duration_HH': this.duration.substring(3, 5),
-					'stream_duration_MM': this.duration.substring(6, 8),
-					'stream_duration_SS': this.duration.substring(9, 11),
-					'stream_bitrate': this.bitrate,
-					'cache': this.cache
+					stream_state: this.streaming,
+					stream_duration: this.duration,
+					stream_duration_HH: this.duration.substring(3, 5),
+					stream_duration_MM: this.duration.substring(6, 8),
+					stream_duration_SS: this.duration.substring(9, 11),
+					stream_bitrate: this.bitrate,
+					cache: this.cache,
 				})
 
 				this.checkFeedbacks('streaming_state')
@@ -279,8 +267,7 @@ class WebPresenter extends InstanceBase {
 
 		let resetConnection = false
 
-		if (this.config.host != config.host)
-		{
+		if (this.config.host != config.host) {
 			resetConnection = true
 		}
 
@@ -290,16 +277,17 @@ class WebPresenter extends InstanceBase {
 		this.updateVariables()
 		this.updateFeedbacks()
 		this.updatePresets()
-		
+
 		if (resetConnection === true || this.socket === undefined) {
 			this.initTCP()
 		}
 	}
 
 	sendCommand(cmd) {
-		this.log('debug','sending: ' + cmd)
+		this.log('debug', 'sending: ' + cmd)
 		if (cmd !== undefined) {
-			if (this.socket !== undefined) { // && this.socket.connected) {
+			if (this.socket !== undefined) {
+				// && this.socket.connected) {
 				this.socket.send(cmd)
 			} else {
 				this.log('warn', 'Socket not connected')
@@ -308,10 +296,11 @@ class WebPresenter extends InstanceBase {
 	}
 
 	dataPoller() {
-		if (this.socket !== undefined) { // && this.socket.connected) {
+		if (this.socket !== undefined) {
+			// && this.socket.connected) {
 			this.socket.send('STREAM STATE:\n\n')
 		} else {
-			this.log('debug','dataPoller - Socket not connected')
+			this.log('debug', 'dataPoller - Socket not connected')
 		}
 	}
 }
