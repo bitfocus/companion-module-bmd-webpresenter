@@ -1,51 +1,37 @@
-module.exports = {
-	initFeedbacks() {
-		var feedbacks = {}
+import { combineRgb } from '@companion-module/base'
 
-		feedbacks['streaming_state'] = {
-			label: 'Device is streaming',
-			description: 'Change background colour based on streaming state',
-			options: [
-				{
-					type: 'colorpicker',
-					label: 'Foreground colour',
-					id: 'fg',
-					default: this.rgb(255, 255, 255),
-				},
-				{
-					type: 'colorpicker',
-					label: 'Background colour',
-					id: 'bg',
-					default: this.rgb(0, 255, 0),
-				},
-				{
-					type: 'dropdown',
-					label: 'Value',
-					id: 'stream',
-					default: 'Idle',
-					choices: [
-						{ id: 'Idle', label: 'Idle' },
-						{ id: 'Connecting', label: 'Connecting' },
-						{ id: 'Streaming', label: 'Streaming' },
-						{ id: 'Interrupted', label: 'Interrupted' }
-					]
-				}
-			],
-			callback: (feedback, bank) => {
-			
-				if (feedback.type == 'streaming_state') {
-					console.log('update feedback status: ' + this.streaming)
-					if (this.streaming === feedback.options.stream) {
-						return {
-							color: feedback.options.fg,
-							bgcolor: feedback.options.bg,
-						}
-					}
-				}
+export function updateFeedbacks() {
+
+	let feedbacks = {}
+
+	feedbacks['streaming_state'] = {
+		type: 'boolean',
+		name: 'Device is streaming',
+		description: 'Change background colour based on streaming state',
+		defaultStyle: {
+			color: combineRgb(0, 0, 0),
+			bgcolor: combineRgb(0, 204, 0),
+		},
+		options: [{
+			type: 'dropdown',
+			label: 'State',
+			id: 'stream_state',
+			default: 'Streaming',
+			choices: [
+				{ id: 'Idle', label: 'Idle' },
+				{ id: 'Connecting', label: 'Connecting' },
+				{ id: 'Streaming', label: 'Streaming' },
+				{ id: 'Interrupted', label: 'Interrupted' }
+			]
+		}],
+		callback: ({ options }) => {
+			console.log('update feedback status: ' + this.streaming)
+			if (this.streaming === options.stream_state) {
+				return true
+			} else {
+				return false
 			}
 		}
-		this.setFeedbackDefinitions(feedbacks)
 	}
-		
-
+	this.setFeedbackDefinitions(feedbacks)
 }

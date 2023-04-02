@@ -42,3 +42,5 @@ Add additional variables for stream durations (hours, minutes, seconds)
 
 Add additional feedback states
 
+Add additional preset
+

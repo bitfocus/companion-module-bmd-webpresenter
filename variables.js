@@ -62,7 +62,4 @@ export function updateVariables() {
 	)
 
 	this.setVariableDefinitions(variables)
-	if (this.streaming) {
-		this.setVariableValues({ stream_state: this.streaming })
-	}
 }

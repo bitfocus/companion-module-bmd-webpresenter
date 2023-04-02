@@ -1,96 +1,35 @@
 // BlackMagic Design Web Presenter HD and 4K
 
-var tcp = require('../../tcp')
-var instance_skel = require('../../instance_skel')
+import {
+	InstanceBase,
+	Regex,
+	runEntrypoint,
+	TCPHelper,
+} from '@companion-module/base'
+import { updateActions } from './actions.js'
+import { updateFeedbacks } from './feedback.js'
+import { updatePresets } from './presets.js'
+import { updateVariables } from './variables.js'
+import { upgradeScripts } from './upgrades.js'
 
-var actions = require('./actions')
-var feedback = require('./feedback')
-var presets = require('./presets')
-var variables = require('./variables')
 
-var debug
-var log
+class WebPresenter extends InstanceBase {
 
-class instance extends instance_skel {
-	
-	constructor(system, id, config) {
-		super(system, id, config)
-	
-		this.request_id = 0
-		this.stash = []
-		this.command = null
-		this.formats = []
-		this.quality = []
-		this.platforms = []
-	
-		Object.assign(this, {
-			...actions,
-			...feedback,
-			...presets,
-			...variables
-		})
-	}
-	
-	actions(system) {
-		this.setActions(this.getActions());
+	constructor(internal) {
+		super(internal)
+
+		this.updateActions = updateActions.bind(this)
+		this.updateFeedbacks = updateFeedbacks.bind(this)
+		this.updatePresets = updatePresets.bind(this)
+		this.updateVariables = updateVariables.bind(this)
+
 	}
 
-	action(action) {
-		var cmd
-	
-		if (action.action === 'stream') {
-			if (action.options.stream_control === 'Toggle') {
-				if (this.streaming === 'Streaming' || this.streaming === 'Connecting') {
-					cmd = 'STREAM STATE:\nAction: Stop\n\n'
-				} else {
-					cmd = 'STREAM STATE:\nAction: Start\n\n'
-				}
-			} else {
-				cmd = 'STREAM STATE:\nAction: ' + action.options.stream_control + '\n\n'
-			}
-			this.log('debug', cmd)
-		}
-	
-		if (action.action === 'stream_settings') {
-			cmd =
-				'STREAM SETTINGS:\nVideo Mode: ' +
-				action.options.video_mode +
-				'\n' +
-				'Current Platform: ' +
-				action.options.platform +
-				'\n' +
-				'Current Server: ' +
-				action.options.server +
-				'\n' +
-				'Current Quality Level: ' +
-				action.options.quality +
-				'\n' +
-				'Stream Key: ' +
-				action.options.key +
-				'\n\n'
-			// this.log('debug', cmd)
-			console.log(cmd)
-		}
-	
-		if (action.action === 'device') {
-			cmd = 'SHUTDOWN:\nAction: ' + action.options.device_control + '\n\n'
-			// this.log('debug', cmd)
-		}
-	
-		if (cmd !== undefined) {
-			if (this.socket !== undefined && this.socket.connected) {
-				this.socket.send(cmd)
-			} else {
-				debug('Socket not connected')
-			}
-		}
-	}
-
-	config_fields() {
-
+	getConfigFields() {
+		console.log('config fields')
 		return [
 			{
-				type: 'text',
+				type: 'static-text',
 				id: 'info',
 				width: 12,
 				label: 'Information',
@@ -101,7 +40,7 @@ class instance extends instance_skel {
 				id: 'host',
 				label: 'Device IP',
 				width: 6,
-				regex: this.REGEX_IP,
+				regex: Regex.IP,
 			},
 			{
 				type: 'textinput',
@@ -109,113 +48,110 @@ class instance extends instance_skel {
 				label: 'Device Port',
 				width: 6,
 				default: '9977',
-				regex: this.REGEX_PORT,
+				regex: Regex.Port,
 			},
 		]
 	}
-	
-	destroy() {
+
+	async destroy() {
 		if (this.timer) {
 			clearInterval(this.timer)
 			delete this.timer
 		}
-	
+
 		if (this.socket !== undefined) {
 			this.socket.destroy()
 		}
-	
-		debug('destroy', this.id)
+
+		console.log('destroy', this.id)
 	}
-	
-	// getConfig() {
-	// 	if (this.configuration === undefined) {
-	// 		this.configuration = {
-	// 			// set some default config here?
-	// 		}
-	// 	}
-	// 	return this.configuration
-	// }
-	
-	init() {
+
+	async init(config) {
+
 			console.log('init WebPresenter')
 
-			debug = this.debug
-			log = this.log
-
+			this.config = config
+			this.request_id = 0
+			this.stash = []
+			this.command = null
+			this.formats = []
+			this.quality = []
+			this.platforms = []
 			this.timer = undefined
 
-			this.initVariables()
-			this.initFeedbacks()
-			this.initPresets()
-			this.init_tcp()
+			console.log(this.config)
+
+			this.updateActions()
+			this.updateVariables()
+			this.updateFeedbacks()
+			this.updatePresets()
+
+			this.initTCP()
 
 	}
-	
-	init_tcp() {
-		var receivebuffer = ''
-	
+
+	initTCP() {
+		console.log('initTCP ' + this.config.host + ':' + this.config.port)
+
+		this.receiveBuffer = ''
+
 		if (this.socket !== undefined) {
 			this.socket.destroy()
 			delete this.socket
 		}
-	
-		this.has_data = false
-	
+
 		if (this.config.host) {
-			this.socket = new tcp(this.config.host, this.config.port)
-	
+			this.socket = new TCPHelper(this.config.host, this.config.port)
+
 			this.socket.on('status_change', (status, message) => {
-				this.status(status, message);
+				this.updateStatus(status, message);
 			})
-			
+
 			this.socket.on('error', (err) => {
-				this.debug("Network error", err);
-				this.log('error',"Network error: " + err.message);
+				console.log('Network error', err);
+				this.log('error', 'Network error: ' + err.message);
 			})
 
 			this.socket.on('connect', () => {
-				this.debug("Connected")
+				console.log("Connected")
 				// poll every second
 				this.timer = setInterval(this.dataPoller.bind(this), 1000)
 			})
-	
+
 			// separate buffered stream into lines with responses
 			this.socket.on('data', (chunk) => {
-				// console.log('data received')
 				var i = 0,
 					line = '',
 					offset = 0
-				receivebuffer += chunk
-	
-				while ((i = receivebuffer.indexOf('\n', offset)) !== -1) {
-					line = receivebuffer.substr(offset, i - offset)
+				this.receiveBuffer += chunk
+
+				while ((i = this.receiveBuffer.indexOf('\n', offset)) !== -1) {
+					line = this.receiveBuffer.substr(offset, i - offset)
 					offset = i + 1
 					if (line.toString() != 'ACK') {
 						this.socket.emit('receiveline', line.toString())
 						// console.log(line.toString())
 					}
 				}
-	
-				receivebuffer = receivebuffer.substr(offset)
+
+				this.receiveBuffer = this.receiveBuffer.substr(offset)
 			})
-	
+
 			this.socket.on('receiveline', (line) => {
 				if (this.command === null && line.match(/:/)) {
 					this.command = line
-					// console.log('command: ' + line)
 				} else if (this.command !== null && line.length > 0) {
 					this.stash.push(line.trim())
 				} else if (line.length === 0 && this.command !== null) {
 					var cmd = this.command.trim().split(/:/)[0]
-	
 					var obj = {}
 					this.stash.forEach(function (val) {
 						var info = val.split(/\s*:\s*/)
 						obj[info.shift()] = info.join(':')
 					})
-	
+
 					this.processDeviceInformation(cmd, obj)
-	
+
 					this.stash = []
 					this.command = null
 				} else if (line.length > 0) {
@@ -224,27 +160,23 @@ class instance extends instance_skel {
 			})
 		}
 	}
-	
+
 	processDeviceInformation(key, data) {
 
-		var oldHasData = (this.has_data = true)
-	
 		console.log('device information process key : ' + key)
 		console.log('device information process data:')
 		console.info(data)
-	
+
 		if (key == 'IDENTITY') {
 			if (data['Label'] !== undefined) {
-				this.setVariable('label', data['Label'])
-				this.has_data = true
+				this.setVariableValues({ 'label': data['Label'] })
 			}
-	
+
 			if (data['Model'] !== undefined) {
-				this.setVariable('model', data['Model'])
-				this.has_data = true
+				this.setVariableValues({ 'model': data['Model'] })
 			}
 		}
-	
+
 		if (key == 'STREAM SETTINGS') {
 			if (data['Available Video Modes'] !== undefined) {
 				var m = data['Available Video Modes'].split(',')
@@ -252,39 +184,36 @@ class instance extends instance_skel {
 				for (var i = 0; i < m.length; i++) {
 					this.formats.push({ id: m[i].trim(), label: m[i].trim() })
 				}
-				this.has_data = true
-	
+
 				console.log('formats available from device:')
 				console.log(this.formats)
-				this.actions()
+				this.updateActions()
 			}
-	
+
 			if (data['Available Quality Levels'] !== undefined) {
 				var q = data['Available Quality Levels'].split(',')
 				this.quality = []
 				for (var i = 0; i < q.length; i++) {
 					this.quality.push({ id: q[i].trim(), label: q[i].trim() })
 				}
-				this.has_data = true
-	
+
 				console.log('quality levels available from device:')
 				console.log(this.quality)
-				this.actions()
+				this.updateActions()
 			}
-	
+
 			if (data['Available Default Platforms'] !== undefined) {
 				var p = data['Available Default Platforms'].split(',')
 				this.platforms = []
 				for (var i = 0; i < p.length; i++) {
 					this.platforms.push({ id: p[i].trim(), label: p[i].trim() })
 				}
-				this.has_data = true
 	
 				console.log('platforms available from device:')
 				console.log(this.platforms)
-				this.actions()
+				this.updateActions()
 			}
-	
+
 			// also list custom platforms in select list
 			if (data['Available Custom Platforms'] !== undefined) {
 				var p = data['Available Custom Platforms'].split(',')
@@ -295,94 +224,96 @@ class instance extends instance_skel {
 				for (var i = 0; i < p.length; i++) {
 					this.platforms.push({ id: p[i].trim(), label: p[i].trim() })
 				}
-				this.has_data = true
-	
+
 				console.log('platforms available from device:')
 				console.log(this.platforms)
-				this.actions()
+				this.updateActions()
 			}
-	
+
 			if (data['Video Mode'] !== undefined) {
-				this.setVariable('video_mode', data['Video Mode'])
-				this.has_data = true
+				this.setVariableValues({ 'video_mode': data['Video Mode'] })
 			}
-	
+
 			if (data['Current Quality Level'] !== undefined) {
-				this.setVariable('quality', data['Current Quality Level'])
-				this.has_data = true
+				this.setVariableValues({ 'quality': data['Current Quality Level'] })
 			}
-	
+
 			if (data['Current Server'] !== undefined) {
-				this.setVariable('server', data['Current Server'])
-				this.has_data = true
+				this.setVariableValues({ 'server': data['Current Server'] })
 			}
-	
+
 			if (data['Current Platform'] !== undefined) {
-				this.setVariable('platform', data['Current Platform'])
-				this.has_data = true
+				this.setVariableValues({ 'platform': data['Current Platform'] })
 			}
-	
+
 			if (data['Stream Key'] !== undefined) {
-				this.setVariable('key', data['Stream Key'])
-				this.has_data = true
+				this.setVariableValues({ 'key': data['Stream Key'] })
 			}
 		}
-	
-		if (key == 'STREAM STATE') {
-			// console.log('stream state = ' + data)
-	
+
+		if (key == 'STREAM STATE') {	
 			if (data['Status'] !== undefined) {
+				
 				this.streaming = data['Status']
-				this.setVariable('stream_state', this.streaming)
-				this.checkFeedbacks('streaming_state')
-	
 				this.duration = data['Duration']
-				this.setVariable('stream_duration', this.duration)
-				this.setVariable('stream_duration_HH', this.duration.substring(3, 5))
-				this.setVariable('stream_duration_MM', this.duration.substring(6, 8))
-				this.setVariable('stream_duration_SS', this.duration.substring(9, 11))
-	
 				this.bitrate = data['Bitrate']
-				this.setVariable('stream_bitrate', this.bitrate)
-	
 				this.cache = data['Cache Used']
-				this.setVariable('cache', this.cache)
-	
-				this.has_data = true
+
+				this.setVariableValues({
+					'stream_state': this.streaming,
+					'stream_duration': this.duration,
+					'stream_duration_HH': this.duration.substring(3, 5),
+					'stream_duration_MM': this.duration.substring(6, 8),
+					'stream_duration_SS': this.duration.substring(9, 11),
+					'stream_bitrate': this.bitrate,
+					'cache': this.cache
+				})
+
+				this.checkFeedbacks('streaming_state')
 			}
 		}
 	}
-	
-	updateConfig(config) {
-		var resetConnection = false
-		
+
+	async configUpdated(config) {
+		console.log('configUpdated')
+
+		let resetConnection = false
+
 		if (this.config.host != config.host)
 		{
 			resetConnection = true
 		}
-	
+
 		this.config = config
 
-		this.actions()
-		this.initFeedbacks()
-		this.initVariables()
+		this.updateActions()
+		this.updateVariables()
+		this.updateFeedbacks()
+		this.updatePresets()
 		
 		if (resetConnection === true || this.socket === undefined) {
-			this.init_tcp()
+			this.initTCP()
+		}
+	}
+
+	sendCommand(cmd) {
+		this.log('debug','sending: ' + cmd)
+		if (cmd !== undefined) {
+			if (this.socket !== undefined) { // && this.socket.connected) {
+				this.socket.send(cmd)
+			} else {
+				this.log('warn', 'Socket not connected')
+			}
 		}
 	}
 
 	dataPoller() {
-	
-		if (this.socket === undefined) {
-			return
-		}
-	
-		if (this.socket.connected) {
+		if (this.socket !== undefined) { // && this.socket.connected) {
 			this.socket.send('STREAM STATE:\n\n')
 		} else {
-			debug('Socket not connected')
+			this.log('debug','dataPoller - Socket not connected')
 		}
 	}
 }
-exports = module.exports = instance
+
+runEntrypoint(WebPresenter, upgradeScripts)

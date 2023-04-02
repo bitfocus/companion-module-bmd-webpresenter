@@ -87,5 +87,31 @@ export function updatePresets() {
 		feedbacks: [],
 	}
 
+	presets['Reboot'] = {
+		type: 'button',
+		category: 'Device',
+		name: 'Reboot WebPresenter',
+		style: {
+			text: 'Reboot',
+			size: 'auto',
+			bgcolor: combineRgb(0, 0, 0),
+			color: combineRgb(255, 255, 255),
+		},
+		steps: [
+			{
+				down: [
+					{
+						actionId: 'device',
+						options: {
+							device_control: 'Reboot',
+						},
+					},
+				],
+				up: [],
+			},
+		],
+		feedbacks: [],
+	}
+
 	this.setPresetDefinitions(presets)
 }
