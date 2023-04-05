@@ -44,3 +44,9 @@ Add additional feedback states
 
 Add additional preset
 
+## Version 2.0.1
+Add legacy module name to manifest
+
+## Version 2.0.2
+Add a warning in the log for missing Stream Key or Platform
+
