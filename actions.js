@@ -72,10 +72,10 @@ export function updateActions() {
 		],
 		callback: ({ options }) => {
 			if (options.server == '') {
-				this.log('warn','Server parameter is missing from Stream Settings')
+				this.log('warn', 'Server parameter is missing from Stream Settings')
 			}
 			if (options.key == '') {
-				this.log('warn','Stream Key parameter is missing from Stream Settings')
+				this.log('warn', 'Stream Key parameter is missing from Stream Settings')
 			}
 			var cmd =
 				'STREAM SETTINGS:\nVideo Mode: ' +
