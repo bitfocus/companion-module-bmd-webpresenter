@@ -48,5 +48,5 @@ Add additional preset
 Add legacy module name to manifest
 
 ## Version 2.0.2
-Add a warning in the log for missing Stream Key or Platform
+Add a warning in the log for missing Stream Key or Server
 
