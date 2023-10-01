@@ -53,14 +53,17 @@ export function updateActions() {
 				label: 'Server',
 				id: 'server',
 				default: '',
-				tooltip: 'Depends on platform.\nRefer to Blackmagic Web Presenter desktop application for possible options.',
+				useVariables: true,
+				tooltip:
+					'Depends on platform.\nRefer to Blackmagic Web Presenter desktop application for possible options. You may use Companion variables.',
 			},
 			{
 				type: 'textinput',
 				label: 'Stream Key',
 				id: 'key',
 				default: '',
-				tooltip: 'Provided by the streaming platform.',
+				useVariables: true,
+				tooltip: 'Provided by the streaming platform. You may use Companion variables.',
 			},
 			{
 				type: 'dropdown',
@@ -70,28 +73,32 @@ export function updateActions() {
 				choices: this.quality,
 			},
 		],
-		callback: ({ options }) => {
-			if (options.server == '') {
+		callback: async (action, context) => {
+			if (action.options.server == '') {
 				this.log('warn', 'Server parameter is missing from Stream Settings')
 			}
-			if (options.key == '') {
+			if (action.options.key == '') {
 				this.log('warn', 'Stream Key parameter is missing from Stream Settings')
 			}
+
+			const server = await context.parseVariablesInString(action.options.server)
+			const key = await context.parseVariablesInString(action.options.key)
+
 			var cmd =
 				'STREAM SETTINGS:\nVideo Mode: ' +
-				options.video_mode +
+				action.options.video_mode +
 				'\n' +
 				'Current Platform: ' +
-				options.platform +
+				action.options.platform +
 				'\n' +
 				'Current Server: ' +
-				options.server +
+				server +
 				'\n' +
 				'Current Quality Level: ' +
-				options.quality +
+				action.options.quality +
 				'\n' +
 				'Stream Key: ' +
-				options.key +
+				key +
 				'\n\n'
 			this.sendCommand(cmd)
 		},
