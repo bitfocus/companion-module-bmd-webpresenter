@@ -57,6 +57,14 @@ export function updateVariables() {
 		{
 			name: 'Cache Used',
 			variableId: 'cache',
+		},
+		{
+			name: 'Passphrase',
+			variableId: 'passphrase',
+		},
+		{
+			name: 'Current URL',
+			variableId: 'URL',
 		}
 	)
 

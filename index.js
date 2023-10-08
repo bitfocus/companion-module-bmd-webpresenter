@@ -238,6 +238,15 @@ class WebPresenter extends InstanceBase {
 			if (data['Stream Key'] !== undefined) {
 				this.setVariableValues({ key: data['Stream Key'] })
 			}
+			
+			if (data['Password'] !== undefined) {
+				this.setVariableValues({ passphrase: data['Password'] })
+			}
+			
+			if (data['Current URL'] !== undefined) {
+				this.setVariableValues({ URL: data['Current URL'] })
+			}
+			
 		}
 
 		if (key == 'STREAM STATE') {
