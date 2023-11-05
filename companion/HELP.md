@@ -53,3 +53,10 @@ Add a warning in the log for missing Server or Stream Key
 ## Version 2.0.3
 Allow variables to be used in Server and Stream Key fields
 
+## Version 2.1.0
+Updates for WebPresenter firmware version 3.3
+
+- Add variables for URL and Passphrase
+- Additional stream settings for Custom URL and Passphrase
+- Add an action for simple YouTube configuration which only needs the key
+- Add separate actions for Video Mode and Stream Quality

@@ -32,7 +32,7 @@ export function updateActions() {
 	}
 
 	actions['stream_settings'] = {
-		name: 'Stream Settings',
+		name: 'All Stream Settings',
 		options: [
 			{
 				type: 'dropdown',
@@ -45,7 +45,6 @@ export function updateActions() {
 				type: 'dropdown',
 				label: 'Platform',
 				id: 'platform',
-				default: 'YouTube',
 				choices: this.platforms,
 			},
 			{
@@ -72,6 +71,22 @@ export function updateActions() {
 				default: 'Streaming Medium',
 				choices: this.quality,
 			},
+			{
+				type: 'textinput',
+				label: 'Custom URL',
+				id: 'customURL',
+				default: '',
+				useVariables: true,
+				tooltip: 'Only required for custom platforms. You may use Companion variables.',
+			},
+			{
+				type: 'textinput',
+				label: 'Passphrase',
+				id: 'passphrase',
+				default: '',
+				useVariables: true,
+				tooltip: 'Only required for SRT platforms. You may use Companion variables.',
+			},
 		],
 		callback: async (action, context) => {
 			if (action.options.server == '') {
@@ -83,6 +98,8 @@ export function updateActions() {
 
 			const server = await context.parseVariablesInString(action.options.server)
 			const key = await context.parseVariablesInString(action.options.key)
+			const url = await context.parseVariablesInString(action.options.customURL)
+			const pass = await context.parseVariablesInString(action.options.passphrase)
 
 			var cmd =
 				'STREAM SETTINGS:\nVideo Mode: ' +
@@ -99,7 +116,64 @@ export function updateActions() {
 				'\n' +
 				'Stream Key: ' +
 				key +
+				'\n'
+
+			if (url != '') {
+				cmd = cmd + 'Current URL: ' + url + '\n'
+			}
+
+			if (pass != '') {
+				cmd = cmd + 'Password: ' + pass + '\n'
+			}
+
+			cmd = cmd + '\n'
+
+			this.sendCommand(cmd)
+		},
+	}
+
+	actions['youtube_settings'] = {
+		name: 'YouTube Simple Settings',
+		options: [
+			{
+				type: 'static-text',
+				label: 'All settings are set to YouTube defaults except for the Stream Key',
+				id: 'info',
+			},
+			{
+				type: 'textinput',
+				label: 'Stream Key',
+				id: 'key',
+				default: '',
+				useVariables: false,
+				tooltip: 'Enter the Stream Key from your YouTube creator studio',
+			},
+		],
+		callback: ({ options }) => {
+			// find a suitable YouTube platform from available options
+			var platform = 'YouTube'
+			if (this.platforms.includes('YouTube RTMP') == true) {
+				// changed in WebPresenter 3.3
+				platform = 'YouTube RTMP'
+			}
+
+			var cmd =
+				'STREAM SETTINGS:\nVideo Mode: ' +
+				'Auto' +
+				'\n' +
+				'Current Platform: ' +
+				platform +
+				'\n' +
+				'Current Server: ' +
+				'Primary' +
+				'\n' +
+				'Current Quality Level: ' +
+				'Streaming Medium' +
+				'\n' +
+				'Stream Key: ' +
+				options.key +
 				'\n\n'
+
 			this.sendCommand(cmd)
 		},
 	}
@@ -120,6 +194,40 @@ export function updateActions() {
 		],
 		callback: ({ options }) => {
 			var cmd = 'SHUTDOWN:\nAction: ' + options.device_control + '\n\n'
+			this.sendCommand(cmd)
+		},
+	}
+
+	actions['videoMode'] = {
+		name: 'Change Video Mode',
+		options: [
+			{
+				type: 'dropdown',
+				label: 'Video Mode',
+				id: 'video_mode',
+				default: 'Auto',
+				choices: this.formats,
+			},
+		],
+		callback: ({ options }) => {
+			var cmd = 'STREAM SETTINGS:\nVideo Mode: ' + options.video_mode + '\n\n'
+			this.sendCommand(cmd)
+		},
+	}
+
+	actions['videoQuality'] = {
+		name: 'Change Video Quality',
+		options: [
+			{
+				type: 'dropdown',
+				label: 'Quality',
+				id: 'quality',
+				default: 'Streaming Medium',
+				choices: this.quality,
+			},
+		],
+		callback: ({ options }) => {
+			var cmd = 'STREAM SETTINGS:\nCurrent Quality Level: ' + options.quality + '\n\n'
 			this.sendCommand(cmd)
 		},
 	}
