@@ -59,4 +59,4 @@ Updates for WebPresenter firmware version 3.3
 - Add variables for URL and Passphrase
 - Additional stream settings for Custom URL and Passphrase
 - Add an action for simple YouTube configuration which only needs the key
-- Add separate actions for Video Mode and Stream Quality
+- Add separate actions for Video Mode, Stream Quality and Stream Key

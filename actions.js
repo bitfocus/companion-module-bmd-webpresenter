@@ -145,17 +145,19 @@ export function updateActions() {
 				label: 'Stream Key',
 				id: 'key',
 				default: '',
-				useVariables: false,
-				tooltip: 'Enter the Stream Key from your YouTube creator studio',
+				useVariables: true,
+				tooltip: 'Enter the Stream Key from your YouTube creator studio. You may use Companion variables.',
 			},
 		],
-		callback: ({ options }) => {
+		callback: async (action, context) => {
 			// find a suitable YouTube platform from available options
 			var platform = 'YouTube'
 			if (this.platforms.includes('YouTube RTMP') == true) {
 				// changed in WebPresenter 3.3
 				platform = 'YouTube RTMP'
 			}
+
+			const key = await context.parseVariablesInString(action.options.key)
 
 			var cmd =
 				'STREAM SETTINGS:\nVideo Mode: ' +
@@ -171,7 +173,7 @@ export function updateActions() {
 				'Streaming Medium' +
 				'\n' +
 				'Stream Key: ' +
-				options.key +
+				key +
 				'\n\n'
 
 			this.sendCommand(cmd)
@@ -228,6 +230,27 @@ export function updateActions() {
 		],
 		callback: ({ options }) => {
 			var cmd = 'STREAM SETTINGS:\nCurrent Quality Level: ' + options.quality + '\n\n'
+			this.sendCommand(cmd)
+		},
+	}
+
+	actions['streamKey'] = {
+		name: 'Change Stream Key',
+		options: [
+			{
+				type: 'textinput',
+				label: 'Stream Key',
+				id: 'key',
+				default: '',
+				useVariables: true,
+				tooltip: 'Enter the Stream Key. You may use Companion variables.',
+			},
+		],
+		callback: async (action, context) => {
+			const key = await context.parseVariablesInString(action.options.key)
+
+			var cmd = 'STREAM SETTINGS:\nStream Key: ' + key + '\n\n'
+
 			this.sendCommand(cmd)
 		},
 	}
