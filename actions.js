@@ -73,14 +73,6 @@ export function updateActions() {
 			},
 			{
 				type: 'textinput',
-				label: 'Custom URL',
-				id: 'customURL',
-				default: '',
-				useVariables: true,
-				tooltip: 'Only required for custom platforms. You may use Companion variables.',
-			},
-			{
-				type: 'textinput',
 				label: 'Passphrase',
 				id: 'passphrase',
 				default: '',
@@ -98,7 +90,6 @@ export function updateActions() {
 
 			const server = await context.parseVariablesInString(action.options.server)
 			const key = await context.parseVariablesInString(action.options.key)
-			const url = await context.parseVariablesInString(action.options.customURL)
 			const pass = await context.parseVariablesInString(action.options.passphrase)
 
 			var cmd =
@@ -117,10 +108,6 @@ export function updateActions() {
 				'Stream Key: ' +
 				key +
 				'\n'
-
-			if (url != '') {
-				cmd = cmd + 'Current URL: ' + url + '\n'
-			}
 
 			if (pass != '') {
 				cmd = cmd + 'Password: ' + pass + '\n'
@@ -180,6 +167,75 @@ export function updateActions() {
 			this.sendCommand(cmd)
 		},
 	}
+
+	actions['custom_settings'] = {
+		name: 'Custom URL H.264/H.265 Settings',
+		options: [
+			{
+				type: 'dropdown',
+				label: 'Platform',
+				id: 'platform',
+				choices: this.customPlatforms,
+			},
+			{
+				type: 'dropdown',
+				label: 'Video Mode',
+				id: 'video_mode',
+				default: 'Auto',
+				choices: this.formats,
+			},
+			{
+				type: 'textinput',
+				label: 'Custom URL',
+				id: 'customURL',
+				default: '',
+				useVariables: true,
+				tooltip: 'Enter the URL of the custom server. You may use Companion variables.',
+			},
+			{
+				type: 'textinput',
+				label: 'Stream Key',
+				id: 'key',
+				default: '',
+				useVariables: true,
+				tooltip: 'Enter the stream key of the custom server. You may use Companion variables.',
+			},
+			{
+				type: 'dropdown',
+				label: 'Quality',
+				id: 'quality',
+				default: 'Streaming Medium',
+				choices: this.quality,
+			},
+		],
+		callback: async (action, context) => {
+	
+			const url = await context.parseVariablesInString(action.options.customURL)
+			const key = await context.parseVariablesInString(action.options.key)
+			
+			var cmd =
+				'STREAM SETTINGS:\nVideo Mode: ' +
+				action.options.video_mode +
+				'\n' +
+				'Current Platform:' +
+				action.options.platform +
+				'\n' +
+				'Current Server: Custom' +
+				'\n' +
+				'Current Quality Level: ' +
+				action.options.quality +
+				'\n' +
+				'Current URL:' + 
+				url +
+				'\n' +
+				'Stream Key: ' +
+				key +
+				'\n\n'
+	
+			this.sendCommand(cmd)
+		},
+	}
+
 
 	actions['device'] = {
 		name: 'Device Control',
