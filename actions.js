@@ -152,7 +152,8 @@ export function updateActions() {
 		callback: async (action, context) => {
 			// find a suitable YouTube platform from available options
 			var platform = 'YouTube'
-			if (this.platforms.includes('YouTube RTMP') == true) {
+			const checkRTMP = (obj) => obj.label === 'YouTube RTMP'
+			if (this.platforms.some(checkRTMP) == true) {
 				// changed in WebPresenter 3.3
 				platform = 'YouTube RTMP'
 			}
