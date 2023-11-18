@@ -68,6 +68,7 @@ class WebPresenter extends InstanceBase {
 		this.formats = []
 		this.quality = []
 		this.platforms = []
+		this.customPlatforms = []
 		this.timer = undefined
 
 		console.log(this.config)
@@ -194,8 +195,13 @@ class WebPresenter extends InstanceBase {
 			if (data['Available Default Platforms'] !== undefined) {
 				var p = data['Available Default Platforms'].split(',')
 				this.platforms = []
+				
 				for (var i = 0; i < p.length; i++) {
-					this.platforms.push({ id: p[i].trim(), label: p[i].trim() })
+					if (p[i].trim() == "Custom URL H.264" || p[i].trim() == "Custom URL H.265") {
+						this.customPlatforms.push({ id: p[i].trim(), label: p[i].trim() })
+					} else {
+						this.platforms.push({ id: p[i].trim(), label: p[i].trim() })
+					}
 				}
 
 				console.log('platforms available from device:')
