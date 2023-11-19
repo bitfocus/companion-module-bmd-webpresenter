@@ -32,7 +32,7 @@ export function updateActions() {
 	}
 
 	actions['stream_settings'] = {
-		name: 'All Stream Settings',
+		name: 'Stream Settings',
 		options: [
 			{
 				type: 'dropdown',
@@ -71,14 +71,6 @@ export function updateActions() {
 				default: 'Streaming Medium',
 				choices: this.quality,
 			},
-			{
-				type: 'textinput',
-				label: 'Passphrase',
-				id: 'passphrase',
-				default: '',
-				useVariables: true,
-				tooltip: 'Only required for SRT platforms. You may use Companion variables.',
-			},
 		],
 		callback: async (action, context) => {
 			if (action.options.server == '') {
@@ -90,7 +82,6 @@ export function updateActions() {
 
 			const server = await context.parseVariablesInString(action.options.server)
 			const key = await context.parseVariablesInString(action.options.key)
-			const pass = await context.parseVariablesInString(action.options.passphrase)
 
 			var cmd =
 				'STREAM SETTINGS:\nVideo Mode: ' +
@@ -107,13 +98,7 @@ export function updateActions() {
 				'\n' +
 				'Stream Key: ' +
 				key +
-				'\n'
-
-			if (pass != '') {
-				cmd = cmd + 'Password: ' + pass + '\n'
-			}
-
-			cmd = cmd + '\n'
+				'\n\n'
 
 			this.sendCommand(cmd)
 		},
@@ -209,10 +194,9 @@ export function updateActions() {
 			},
 		],
 		callback: async (action, context) => {
-	
 			const url = await context.parseVariablesInString(action.options.customURL)
 			const key = await context.parseVariablesInString(action.options.key)
-			
+
 			var cmd =
 				'STREAM SETTINGS:\nVideo Mode: ' +
 				action.options.video_mode +
@@ -225,17 +209,16 @@ export function updateActions() {
 				'Current Quality Level: ' +
 				action.options.quality +
 				'\n' +
-				'Current URL:' + 
+				'Current URL:' +
 				url +
 				'\n' +
 				'Stream Key: ' +
 				key +
 				'\n\n'
-	
+
 			this.sendCommand(cmd)
 		},
 	}
-
 
 	actions['device'] = {
 		name: 'Device Control',
@@ -308,6 +291,27 @@ export function updateActions() {
 
 			var cmd = 'STREAM SETTINGS:\nStream Key: ' + key + '\n\n'
 
+			this.sendCommand(cmd)
+		},
+	}
+	
+	actions['passphrase'] = {
+		name: 'Change SRT Passphrase',
+		options: [
+			{
+				type: 'textinput',
+				label: 'Passphrase',
+				id: 'passphrase',
+				default: '',
+				useVariables: true,
+				tooltip: 'You may use Companion variables.',
+			},
+		],
+		callback: async (action, context) => {
+			const pass = await context.parseVariablesInString(action.options.passphrase)
+	
+			var cmd = 'STREAM SETTINGS:\nPassword: ' + pass + '\n\n'
+	
 			this.sendCommand(cmd)
 		},
 	}
