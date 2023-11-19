@@ -56,8 +56,8 @@ Allow variables to be used in Server and Stream Key fields
 ## Version 2.1.0
 Updates for WebPresenter firmware version 3.3
 
-- Add variables for URL and Passphrase
+- Add variables for URL, Passphrase and Software Version
 - Additional stream setting for Passphrase
-- Add actions for Custom URL platforms
+- Add an action for Custom URL platforms
 - Add an action for simple YouTube configuration which only needs the key
-- Add separate actions for Video Mode, Stream Quality and Stream Key
+- Add separate actions for Video Mode, Stream Quality, Stream Key and SRT Passphrase

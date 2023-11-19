@@ -11,6 +11,10 @@ export function updateVariables() {
 			variableId: 'label',
 		},
 		{
+			name: 'Device Software',
+			variableId: 'software',
+		},
+		{
 			name: 'Video Mode',
 			variableId: 'video_mode',
 		},

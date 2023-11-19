@@ -167,6 +167,12 @@ class WebPresenter extends InstanceBase {
 			}
 		}
 
+		if (key == 'VERSION') {
+			if (data['Software Release'] !== undefined) {
+				this.setVariableValues({ software: data['Software Release'] })
+			}
+		}
+
 		if (key == 'STREAM SETTINGS') {
 			if (data['Available Video Modes'] !== undefined) {
 				var m = data['Available Video Modes'].split(',')
@@ -195,9 +201,9 @@ class WebPresenter extends InstanceBase {
 			if (data['Available Default Platforms'] !== undefined) {
 				var p = data['Available Default Platforms'].split(',')
 				this.platforms = []
-				
+
 				for (var i = 0; i < p.length; i++) {
-					if (p[i].trim() == "Custom URL H.264" || p[i].trim() == "Custom URL H.265") {
+					if (p[i].trim() == 'Custom URL H.264' || p[i].trim() == 'Custom URL H.265') {
 						this.customPlatforms.push({ id: p[i].trim(), label: p[i].trim() })
 					} else {
 						this.platforms.push({ id: p[i].trim(), label: p[i].trim() })
@@ -244,15 +250,14 @@ class WebPresenter extends InstanceBase {
 			if (data['Stream Key'] !== undefined) {
 				this.setVariableValues({ key: data['Stream Key'] })
 			}
-			
+
 			if (data['Password'] !== undefined) {
 				this.setVariableValues({ passphrase: data['Password'] })
 			}
-			
+
 			if (data['Current URL'] !== undefined) {
 				this.setVariableValues({ URL: data['Current URL'] })
 			}
-			
 		}
 
 		if (key == 'STREAM STATE') {
