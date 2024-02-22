@@ -1,6 +1,6 @@
 // BlackMagic Design Web Presenter HD and 4K
 
-import { InstanceBase, Regex, runEntrypoint, TCPHelper } from '@companion-module/base'
+import { InstanceBase, InstanceStatus, Regex, runEntrypoint, TCPHelper } from '@companion-module/base'
 import { updateActions } from './actions.js'
 import { updateFeedbacks } from './feedback.js'
 import { updatePresets } from './presets.js'
@@ -70,6 +70,7 @@ class WebPresenter extends InstanceBase {
 		this.platforms = []
 		this.customPlatforms = []
 		this.timer = undefined
+		this.poll = false
 
 		console.log(this.config)
 
@@ -101,11 +102,14 @@ class WebPresenter extends InstanceBase {
 			this.socket.on('error', (err) => {
 				console.log('Network error', err)
 				this.log('error', 'Network error: ' + err.message)
+				this.updateStatus(InstanceStatus.ConnectionFailure, err.message)
+				this.poll = false
 			})
 
 			this.socket.on('connect', () => {
 				console.log('Connected')
 				// poll every second
+				this.poll = true
 				this.timer = setInterval(this.dataPoller.bind(this), 1000)
 			})
 
@@ -307,7 +311,6 @@ class WebPresenter extends InstanceBase {
 		this.log('debug', 'sending: ' + cmd)
 		if (cmd !== undefined) {
 			if (this.socket !== undefined) {
-				// && this.socket.connected) {
 				this.socket.send(cmd)
 			} else {
 				this.log('warn', 'Socket not connected')
@@ -316,8 +319,7 @@ class WebPresenter extends InstanceBase {
 	}
 
 	dataPoller() {
-		if (this.socket !== undefined) {
-			// && this.socket.connected) {
+		if (this.socket !== undefined && this.poll) {
 			this.socket.send('STREAM STATE:\n\n')
 		} else {
 			this.log('debug', 'dataPoller - Socket not connected')
