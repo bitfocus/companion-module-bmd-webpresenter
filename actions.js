@@ -80,8 +80,12 @@ export function updateActions() {
 				this.log('warn', 'Stream Key parameter is missing from Stream Settings')
 			}
 
-			const server = await context.parseVariablesInString(action.options.server)
-			const key = await context.parseVariablesInString(action.options.key)
+			var server = await context.parseVariablesInString(action.options.server)
+			var key = await context.parseVariablesInString(action.options.key)
+			
+			if (server == '' && action.options.platform == 'Facebook') {
+				server = 'Default'
+			}
 
 			var cmd =
 				'STREAM SETTINGS:\nVideo Mode: ' +
