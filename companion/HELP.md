@@ -64,11 +64,11 @@ Updates for WebPresenter firmware version 3.3
 ## Version 2.1.1
 Fix crash when device is disconnected from network or rebooted
 
-## Version 2.2.0
+## Version 2.1.0
 Automatically set server name for Facebook if it is left empty in the action settings
 
-## Version 2.2.1
+## Version 2.1.1
 Fix reconnect on reboot issue
 
-## Version 2.2.2
+## Version 2.1.3
 Update dependencies
