@@ -1,11 +1,10 @@
-// BlackMagic Design Web Presenter HD and 4K
+// Blackmagic Design Encoders
 
 import { InstanceBase, InstanceStatus, Regex, runEntrypoint, TCPHelper } from '@companion-module/base'
 import { updateActions } from './actions.js'
 import { updateFeedbacks } from './feedback.js'
 import { updatePresets } from './presets.js'
 import { updateVariables } from './variables.js'
-import { upgradeScripts } from './upgrades.js'
 
 class WebPresenter extends InstanceBase {
 	constructor(internal) {
@@ -23,22 +22,19 @@ class WebPresenter extends InstanceBase {
 			{
 				type: 'static-text',
 				id: 'info',
-				width: 12,
 				label: 'Information',
-				value: 'This module will allow you to control the Blackmagic Web Presenter HD or 4K.',
+				value: 'This module will allow you to control the Blackmagic Web Presenter or Streaming Encoder.',
 			},
 			{
 				type: 'textinput',
 				id: 'host',
 				label: 'Device IP',
-				width: 6,
 				regex: Regex.IP,
 			},
 			{
 				type: 'textinput',
 				id: 'port',
 				label: 'Device Port',
-				width: 6,
 				default: '9977',
 				regex: Regex.Port,
 			},
@@ -327,4 +323,4 @@ class WebPresenter extends InstanceBase {
 	}
 }
 
-runEntrypoint(WebPresenter, upgradeScripts)
+runEntrypoint(WebPresenter)
