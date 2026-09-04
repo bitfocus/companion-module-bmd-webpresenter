@@ -53,8 +53,8 @@ export function updateActions() {
 				id: 'server',
 				default: '',
 				useVariables: true,
-				tooltip:
-					'Depends on platform.\nRefer to Blackmagic Web Presenter desktop application for possible options. You may use Companion variables.',
+				description:
+					'Depends on platform. Refer to Blackmagic Web Presenter desktop application for possible options.',
 			},
 			{
 				type: 'textinput',
@@ -62,7 +62,7 @@ export function updateActions() {
 				id: 'key',
 				default: '',
 				useVariables: true,
-				tooltip: 'Provided by the streaming platform. You may use Companion variables.',
+				description: 'Provided by the streaming platform.',
 			},
 			{
 				type: 'dropdown',
@@ -80,8 +80,8 @@ export function updateActions() {
 				this.log('warn', 'Stream Key parameter is missing from Stream Settings')
 			}
 
-			var server = await context.parseVariablesInString(action.options.server)
-			var key = await context.parseVariablesInString(action.options.key)
+			var server = action.options.server
+			var key = action.options.key
 			
 			if (server == '' && action.options.platform == 'Facebook') {
 				server = 'Default'
@@ -112,17 +112,12 @@ export function updateActions() {
 		name: 'YouTube Simple Settings',
 		options: [
 			{
-				type: 'static-text',
-				label: 'All settings are set to YouTube defaults except for the Stream Key',
-				id: 'info',
-			},
-			{
 				type: 'textinput',
 				label: 'Stream Key',
+				description: 'Enter the Stream Key from your YouTube creator studio account. All other settings are set to YouTube defaults except for the Stream Key.',
 				id: 'key',
 				default: '',
 				useVariables: true,
-				tooltip: 'Enter the Stream Key from your YouTube creator studio. You may use Companion variables.',
 			},
 		],
 		callback: async (action, context) => {
@@ -133,8 +128,8 @@ export function updateActions() {
 				// changed in WebPresenter 3.3
 				platform = 'YouTube RTMP'
 			}
-
-			const key = await context.parseVariablesInString(action.options.key)
+			
+			const key = action.options.key
 
 			var cmd =
 				'STREAM SETTINGS:\nVideo Mode: ' +
@@ -179,7 +174,7 @@ export function updateActions() {
 				id: 'customURL',
 				default: '',
 				useVariables: true,
-				tooltip: 'Enter the URL of the custom server. You may use Companion variables.',
+				description: 'Enter the URL of the custom server.',
 			},
 			{
 				type: 'textinput',
@@ -187,7 +182,7 @@ export function updateActions() {
 				id: 'key',
 				default: '',
 				useVariables: true,
-				tooltip: 'Enter the stream key of the custom server. You may use Companion variables.',
+				description: 'Enter the stream key of the custom server.',
 			},
 			{
 				type: 'dropdown',
@@ -198,8 +193,8 @@ export function updateActions() {
 			},
 		],
 		callback: async (action, context) => {
-			const url = await context.parseVariablesInString(action.options.customURL)
-			const key = await context.parseVariablesInString(action.options.key)
+			const url = action.options.customURL
+			const key = action.options.key
 
 			var cmd =
 				'STREAM SETTINGS:\nVideo Mode: ' +
@@ -287,11 +282,10 @@ export function updateActions() {
 				id: 'key',
 				default: '',
 				useVariables: true,
-				tooltip: 'Enter the Stream Key. You may use Companion variables.',
 			},
 		],
 		callback: async (action, context) => {
-			const key = await context.parseVariablesInString(action.options.key)
+			const key = action.options.key
 
 			var cmd = 'STREAM SETTINGS:\nStream Key: ' + key + '\n\n'
 
@@ -308,11 +302,10 @@ export function updateActions() {
 				id: 'passphrase',
 				default: '',
 				useVariables: true,
-				tooltip: 'You may use Companion variables.',
 			},
 		],
 		callback: async (action, context) => {
-			const pass = await context.parseVariablesInString(action.options.passphrase)
+			const pass = action.options.passphrase
 	
 			var cmd = 'STREAM SETTINGS:\nPassword: ' + pass + '\n\n'
 	
