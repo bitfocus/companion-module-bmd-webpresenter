@@ -1,4 +1,4 @@
-// Blackmagic Design Encoders
+// Blackmagic Design Streaming Encoders
 
 import { InstanceBase, InstanceStatus, Regex, runEntrypoint, TCPHelper } from '@companion-module/base'
 import { updateActions } from './actions.js'

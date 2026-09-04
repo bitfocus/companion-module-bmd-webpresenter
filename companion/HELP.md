@@ -1,8 +1,8 @@
-# Blackmagic Design Web Encoders
+# Blackmagic Design Streaming Encoders
 
 Module to control and monitor the [Blackmagic Design Web Presenter and Streaming Encoders](https://www.blackmagicdesign.com/products/blackmagicstreamingprocessors). This module does not support the discontinued USB only **Web Presenter** product.
 
-Once connection to the device has been established the stream 'Video Mode', 'Platform' and 'Quality' action parameters will be populated with the options that the device supports. If no device connection is possible then these parameters will be unavailable. The 'Server' and 'Stream Key' will not be pre-populated. Use the Blackmagic WebPresenter desktop app to discover the valid 'Server' options for your platform. Consult your streaming platform service provider for the 'Stream Key'.
+Once connection to the device has been established the stream 'Video Mode', 'Platform' and 'Quality' action parameters will be populated with the options that the device supports. If no device connection is possible then these parameters will be unavailable. The 'Server' and 'Stream Key' will not be pre-populated. Use the Blackmagic Streaming Encoder desktop app to discover the valid 'Server' options for your platform. Consult your streaming platform service provider for the 'Stream Key'.
 
 Please log issues and feature requests on [github](https://github.com/bitfocus/companion-module-bmd-webpresenter).
 
@@ -75,4 +75,5 @@ Update dependencies
 
 ## Version 2.1.4
 Update dependencies
+
 Add streaming encoders
