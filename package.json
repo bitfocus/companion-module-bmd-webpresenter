@@ -1,5 +1,6 @@
 {
 	"name": "bmd-webpresenter",
+	"version": "2.1.4",
 	"main": "index.js",
 	"type": "module",
 	"scripts": {
