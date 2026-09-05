@@ -77,3 +77,6 @@ Update dependencies
 Update dependencies
 
 Add streaming encoders
+
+## Version 2.1.5
+Modernise action definitions
